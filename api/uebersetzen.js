@@ -10,9 +10,11 @@ export default async function handler(req, res) {
   const host = req.headers.host || '';
   if (origin && !origin.endsWith('//' + host)) return res.status(403).json({ error: 'Nicht erlaubt' });
 
-  const text = req.body && typeof req.body.text === 'string' ? req.body.text.trim() : '';
-  if (!text) return res.status(400).json({ error: 'Text fehlt' });
-  if (text.length > 5000) return res.status(413).json({ error: 'Text zu lang' });
+  // Akzeptiert { texte: [...] } (mehrere Felder) oder { text: '...' }
+  const body = req.body || {};
+  const texte = (Array.isArray(body.texte) ? body.texte : [body.text]).filter(t => typeof t === 'string' && t.trim()).map(t => t.trim());
+  if (!texte.length) return res.status(400).json({ error: 'Text fehlt' });
+  if (texte.length > 10 || texte.join('').length > 8000) return res.status(413).json({ error: 'Text zu lang' });
 
   const key = process.env.DEEPL_API_KEY;
   if (!key) return res.status(500).json({ error: 'DEEPL_API_KEY ist nicht gesetzt' });
@@ -22,13 +24,14 @@ export default async function handler(req, res) {
     const r = await fetch(base + '/v2/translate', {
       method: 'POST',
       headers: { Authorization: 'DeepL-Auth-Key ' + key, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text: [text], target_lang: 'DE', preserve_formatting: true })
+      body: JSON.stringify({ text: texte, target_lang: 'DE', preserve_formatting: true })
     });
     if (!r.ok) return res.status(502).json({ error: 'DeepL antwortet mit ' + r.status });
     const j = await r.json();
-    const t = j.translations && j.translations[0];
-    // Schweizer Schreibweise: ss statt ß
-    return res.status(200).json({ text_de: (t.text || '').replace(/ß/g, 'ss'), sprache: t.detected_source_language || '' });
+    const tr = j.translations || [];
+    // Schweizer Schreibweise: ss statt ß; Sprache wird am Haupttext (erstes Feld) erkannt
+    const texte_de = tr.map(t => (t.text || '').replace(/ß/g, 'ss'));
+    return res.status(200).json({ texte_de, text_de: texte_de[0] || '', sprache: (tr[0] && tr[0].detected_source_language) || '' });
   } catch (e) {
     return res.status(502).json({ error: 'Übersetzung nicht erreichbar' });
   }
