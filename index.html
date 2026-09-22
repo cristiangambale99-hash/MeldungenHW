@@ -1223,7 +1223,7 @@ async function uebersetzeMeldung(m, versuch=0){
       if(!j || !Array.isArray(j.texte_de) || j.texte_de.length!==texte.length || j.texte_de.some(x=>!String(x||'').trim())) throw new Error('leere Antwort');
       m.sprache=(j.sprache||'').toUpperCase().slice(0,2)||'?';
       const deutsch = m.sprache==='DE' || j.texte_de.every((x,i)=>x.trim()===texte[i].trim());
-      felder.forEach(([k,kd],i)=>{ m[kd]= deutsch ? m[k] : String(j.texte_de[i]).replace(/ß/g,'ss'); });
+      felder.forEach(([k,kd],i)=>{ m[kd]= deutsch ? m[k] : fachbegriffe(j.texte_de[i]); });
       m.uebersetzung = deutsch ? 'nicht_noetig' : 'ok'; m.uebersetztVia=name; m.fehler='';
       renderAdminFalls(); return;
     }catch(err){ fehler.push(name+': '+(err&&(err.code||err.message)||err)); }
@@ -1236,6 +1236,10 @@ async function uebersetzeVorVersand(m){
   await uebersetzeMeldung(m);
   for(let i=0;i<2 && m.uebersetzung==='ausstehend';i++){ await new Promise(r=>setTimeout(r,WARTEZEITEN[i]+500)); if(m.uebersetzung==='laeuft') await new Promise(r=>setTimeout(r,4000)); }
 }
+function fachbegriffe(t){ return String(t||'')
+  .replace(/\bStreik(?:posten)?dienst(e[sn]?)?\b/g,'Pikettdienst$1').replace(/\bStreikposten\b/g,'Pikett')
+  .replace(/\bBereitschaftsdienst(e[sn]?)?\b/g,'Pikettdienst$1').replace(/\bRufbereitschaft\b/g,'Pikettdienst')
+  .replace(/\bHausmeister\b/g,'Hauswart').replace(/\bHausverwaltung\b/g,'Verwaltung').replace(/ß/g,'ss'); }
 async function uebersetzeUeberServer(texte){
   const r=await fetch(UEBERSETZUNG_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte})});
   if(!r.ok) throw new Error('HTTP '+r.status);
@@ -1255,7 +1259,7 @@ async function uebersetzeMitClaude(texte){
   if(!sample) throw new Error('nicht verfügbar');
   const j = await sample.json(
     'Du übersetzt Meldungen von Hauswarten einer Schweizer Reinigungsfirma für die Liegenschaftsverwaltung ins Deutsche. '
-    + 'Übersetze jeden Text der folgenden JSON-Liste sinngemäss, sachlich und korrekt ins Deutsche (Schweizer Schreibweise: ss statt ß). '
+    + 'Übersetze jeden Text der folgenden JSON-Liste sinngemäss, sachlich und korrekt ins Deutsche (Schweizer Schreibweise: ss statt ß; Fachbegriffe: picchetto/piquete/guardia = Pikett bzw. Pikettdienst, Hausmeister = Hauswart). '
     + 'Ist ein Text bereits deutsch, übernimm ihn unverändert. Erkenne die Sprache des ersten Textes als zweistelligen Code (DE, IT, PT, ES, FR, EN …). '
     + 'Antworte nur mit JSON in dieser Form: {"sprache":"IT","texte_de":["…"]} – gleiche Anzahl und Reihenfolge wie die Eingabe.\n\n'
     + JSON.stringify(texte), {modelTier:'quick'});
@@ -1274,7 +1278,9 @@ function mailDaten(m){
   return {nr:m.nr, art:art(m.art).n.de, artId:m.art, unterart:unterartText(m),
     objekt:{nr:m.objekt,strasse:o.strasse,ort:o.ort,kunde:o.kunde,email:o.email||''}, hausnr:m.hausnr,
     stockwerk:m.bereich?nameVon(BEREICHE,m.bereich):'', bereich:m.ort?ortText(m):'', zeitpunkt:m.intern?`${datumIso(m.intern.datum)}, ${m.intern.zeit} Uhr`:'',
-    pikett:m.pikett?{auftraggeber:m.pikett.auftraggeber,datum:datumIso(m.pikett.datum),von:m.pikett.von,bis:m.pikett.bis,dauer:hhmm(e+ADMIN_MIN_PIKETT)+' h ('+dezStd(e+ADMIN_MIN_PIKETT)+' Std.)'}:null,
+    pikett:m.pikett?{auftraggeber:m.pikett.auftraggeber,datum:datumIso(m.pikett.datum),von:m.pikett.von,bis:m.pikett.bis,dauer:hhmm(e+ADMIN_MIN_PIKETT)+' h ('+dezStd(e+ADMIN_MIN_PIKETT)+' Std.)',
+      dauerKurz:hhmm(e)+' h', adminKurz:MIT_ADMIN?hhmm(ADMIN_MIN_PIKETT)+' h':'', totalKurz:hhmm(e+ADMIN_MIN_PIKETT)+' h ('+dezStd(e+ADMIN_MIN_PIKETT)+' Std.)'}:null,
+    gemeldetDatum:datum(m.gemeldet),
     textDe:textFuerVerwaltung(m), textOriginal:m.text, sprache:m.sprache||'', uebersetzt:!['nicht_noetig'].includes(m.uebersetzung),
     hauswart:m.hwName, pnr:m.pnr, gemeldet:new Date(m.gemeldet).toLocaleString('de-CH',{dateStyle:'short',timeStyle:'short'}), fotos:(m.fotos||[]).slice(0,6)};
 }
