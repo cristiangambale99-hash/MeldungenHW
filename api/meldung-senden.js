@@ -1,5 +1,9 @@
 // Vercel Serverless Function: sendet jede Hauswart-Meldung per E-Mail an die Hauswartung.
+// Versand wahlweise über Resend (empfohlen) oder über ein eigenes Mailkonto (SMTP).
 // Umgebungsvariablen (Vercel > Project > Settings > Environment Variables):
+//   RESEND_API_KEY  Schlüssel von resend.com – ist er gesetzt, wird Resend verwendet
+//   MAIL_FROM       optional, Standard: Hauswartung Clean Service <meldungen@clean-service.ch>
+// oder SMTP:
 //   SMTP_HOST   z. B. smtp.office365.com
 //   SMTP_PORT   z. B. 587
 //   SMTP_USER   Absender-Konto, z. B. hauswartung@clean-service.ch
@@ -9,6 +13,8 @@
 import nodemailer from 'nodemailer';
 
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
+
+const ABSENDER = 'Hauswartung Clean Service <meldungen@clean-service.ch>';
 
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -20,7 +26,8 @@ export default async function handler(req, res) {
   const m = req.body || {};
   if (!m.nr || !m.objekt) return res.status(400).json({ error: 'Meldung unvollständig' });
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env;
-  if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) return res.status(500).json({ error: 'SMTP ist nicht konfiguriert' });
+  const RESEND_API_KEY = process.env.RESEND_API_KEY || process.env.API_RESEND_KEY;   // beide Schreibweisen akzeptiert
+  if (!RESEND_API_KEY && (!SMTP_HOST || !SMTP_USER || !SMTP_PASS)) return res.status(500).json({ error: 'Mailversand ist nicht konfiguriert (RESEND_API_KEY oder SMTP)' });
   const an = process.env.MAIL_TO || 'hauswartung@clean-service.ch';
 
   const o = m.objekt;
@@ -57,9 +64,24 @@ export default async function handler(req, res) {
     return t ? { filename: `meldung-${m.nr}-foto-${i + 1}.${t[1].split('/')[1].replace('jpeg', 'jpg')}`, content: Buffer.from(t[2], 'base64'), contentType: t[1] } : null;
   }).filter(Boolean);
 
+  if (RESEND_API_KEY) {
+    try {
+      const r = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + RESEND_API_KEY, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: process.env.MAIL_FROM || ABSENDER, to: [an], subject: betreff, html,
+          attachments: attachments.map(a => ({ filename: a.filename, content: a.content.toString('base64') }))
+        })
+      });
+      if (!r.ok) return res.status(502).json({ error: 'Resend ' + r.status, details: await r.text() });
+      return res.status(200).json({ ok: true, via: 'Resend' });
+    } catch (e) { return res.status(502).json({ error: 'Resend nicht erreichbar' }); }
+  }
+
   try {
     const transport = nodemailer.createTransport({ host: SMTP_HOST, port: Number(SMTP_PORT || 587), secure: Number(SMTP_PORT) === 465, auth: { user: SMTP_USER, pass: SMTP_PASS } });
-    await transport.sendMail({ from: process.env.MAIL_FROM || `Hauswartung App <${SMTP_USER}>`, to: an, subject: betreff, html, attachments });
+    await transport.sendMail({ from: process.env.MAIL_FROM || ABSENDER, to: an, subject: betreff, html, attachments });
     return res.status(200).json({ ok: true });
   } catch (e) {
     return res.status(502).json({ error: 'E-Mail konnte nicht gesendet werden' });
