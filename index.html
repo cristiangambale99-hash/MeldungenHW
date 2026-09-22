@@ -1198,32 +1198,61 @@ function senden(){
     bereich:intern?null:entwurf.bereich, intern:intern?{...entwurf.intern}:null, art:entwurf.art, unterart:UNTERARTEN[entwurf.art]?entwurf.unterart:'', unterartAndere:entwurf.unterart==='andere'?entwurf.unterartAndere.trim():'', pikett:entwurf.art==='pikett'?{...entwurf.pikett,auftraggeber:entwurf.pikett.auftraggeber.trim()}:null, text:entwurf.text.trim(),
     status:'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
   loescheEntwurf(); $('#hw-ok-nr').textContent=t('ok_nr',nr); renderAdmin(); zeigeScreen('ok');
-  const neu=MELDUNGEN.find(m=>m.nr===nr); uebersetzeMeldung(neu).then(()=>sendeMail(neu));
+  const neu=MELDUNGEN.find(m=>m.nr===nr); uebersetzeVorVersand(neu).then(()=>sendeMail(neu));
 }
 
 /* Automatische Übersetzung ins Deutsche (für Verwaltung und Rapport) */
-async function uebersetzeMeldung(m){
+/* Automatische Übersetzung ins Deutsche – versucht mehrere Wege und wiederholt selbständig */
+const WARTEZEITEN = [4000, 15000, 60000, 300000];        /* automatische Wiederholungen */
+async function uebersetzeMeldung(m, versuch=0){
   if(!m) return;
   const felder=[['text','textDe'],['unterartAndere','unterartAndereDe'],['andere','andereDe']].filter(([k])=>m[k]);
   if(!felder.length){ m.textDe=''; m.sprache='DE'; m.uebersetzung='nicht_noetig'; renderAdminFalls(); return; }
+  if(m.uebersetzung==='manuell') return;
   m.uebersetzung='laeuft'; renderAdminFalls();
-  try{
-    const texte=felder.map(([k])=>m[k]);
-    let j;
+  const texte=felder.map(([k])=>m[k]);
+  const wege=[
+    ['Server', ()=>uebersetzeUeberServer(texte)],      /* Vercel: DeepL bzw. Ersatzdienst */
+    ['Claude', ()=>uebersetzeMitClaude(texte)],         /* Vorschau in Claude */
+    ['Direkt', ()=>uebersetzeDirekt(texte)]             /* letzter Ausweg aus dem Browser */
+  ];
+  const fehler=[];
+  for(const [name,weg] of wege){
     try{
-      const r=await fetch(UEBERSETZUNG_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte})});
-      if(!r.ok) throw new Error('HTTP '+r.status);
-      j=await r.json();
-    }catch(serverFehler){ j=await uebersetzeMitClaude(texte); }   /* Vorschau ohne Server: Claude übersetzt */
-    m.sprache=(j.sprache||'').toUpperCase().slice(0,2)||'?';
-    felder.forEach(([k,kd],i)=>{ m[kd]= m.sprache==='DE' ? m[k] : String((j.texte_de||[])[i]||'').replace(/ß/g,'ss'); });
-    m.uebersetzung = m.sprache==='DE' ? 'nicht_noetig' : (m.textDe?'ok':'ausstehend');
-  }catch(err){ m.uebersetzung='ausstehend'; m.fehler=String(err.message||err); }
-  renderAdminFalls();
+      const j=await weg();
+      if(!j || !Array.isArray(j.texte_de) || j.texte_de.length!==texte.length || j.texte_de.some(x=>!String(x||'').trim())) throw new Error('leere Antwort');
+      m.sprache=(j.sprache||'').toUpperCase().slice(0,2)||'?';
+      const deutsch = m.sprache==='DE' || j.texte_de.every((x,i)=>x.trim()===texte[i].trim());
+      felder.forEach(([k,kd],i)=>{ m[kd]= deutsch ? m[k] : String(j.texte_de[i]).replace(/ß/g,'ss'); });
+      m.uebersetzung = deutsch ? 'nicht_noetig' : 'ok'; m.uebersetztVia=name; m.fehler='';
+      renderAdminFalls(); return;
+    }catch(err){ fehler.push(name+': '+(err&&(err.code||err.message)||err)); }
+  }
+  m.uebersetzung='ausstehend'; m.fehler=fehler.join(' · '); renderAdminFalls();
+  if(versuch<WARTEZEITEN.length){ m.naechsterVersuch=Date.now()+WARTEZEITEN[versuch]; setTimeout(()=>{ if(m.uebersetzung==='ausstehend') uebersetzeMeldung(m,versuch+1); }, WARTEZEITEN[versuch]); }
+}
+/* Übersetzen und kurz warten, damit die E-Mail möglichst schon deutsch ist */
+async function uebersetzeVorVersand(m){
+  await uebersetzeMeldung(m);
+  for(let i=0;i<2 && m.uebersetzung==='ausstehend';i++){ await new Promise(r=>setTimeout(r,WARTEZEITEN[i]+500)); if(m.uebersetzung==='laeuft') await new Promise(r=>setTimeout(r,4000)); }
+}
+async function uebersetzeUeberServer(texte){
+  const r=await fetch(UEBERSETZUNG_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte})});
+  if(!r.ok) throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function uebersetzeDirekt(texte){
+  const texte_de=[]; let sprache='';
+  for(const t of texte){
+    const r=await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=de&dt=t&q='+encodeURIComponent(t));
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const j=await r.json(); texte_de.push((j[0]||[]).map(x=>x[0]).join('')); if(!sprache) sprache=String(j[2]||'');
+  }
+  return {texte_de, sprache};
 }
 async function uebersetzeMitClaude(texte){
   const sample = window.claude && window.claude.use ? await window.claude.use('sample') : null;
-  if(!sample) throw new Error('Keine Übersetzung verfügbar');
+  if(!sample) throw new Error('nicht verfügbar');
   const j = await sample.json(
     'Du übersetzt Meldungen von Hauswarten einer Schweizer Reinigungsfirma für die Liegenschaftsverwaltung ins Deutsche. '
     + 'Übersetze jeden Text der folgenden JSON-Liste sinngemäss, sachlich und korrekt ins Deutsche (Schweizer Schreibweise: ss statt ß). '
@@ -1263,7 +1292,7 @@ function uebersetzungTag(m){
   if(m.uebersetzung==='ok') return `<span class="tag" title="Automatisch übersetzt">${esc(m.sprache)} → DE</span>`;
   if(m.uebersetzung==='manuell') return `<span class="tag positiv" title="Von Hand übersetzt">${esc(m.sprache||'?')} → DE</span>`;
   if(m.uebersetzung==='laeuft') return `<span class="tag">Wird übersetzt …</span>`;
-  if(m.uebersetzung==='ausstehend') return `<span class="tag warnung">Übersetzung fehlt</span>`;
+  if(m.uebersetzung==='ausstehend') return `<span class="tag warnung">Übersetzung folgt …</span>`;
   return '';
 }
 $('#hw-weiter').addEventListener('click',()=>{
@@ -1369,8 +1398,8 @@ function oeffne(nr){
           <div class="uebers-original">${esc(m.text)}</div>
           <label class="uebers-kopf" for="modal-textde"><span>Deutsch · erscheint so auf dem Rapport</span></label>
           <textarea id="modal-textde" rows="4" placeholder="${m.uebersetzung==='laeuft'?'Übersetzung läuft …':'Deutsche Übersetzung eintragen'}">${esc(m.textDe||'')}</textarea>
-          <div class="uebers-aktionen"><button type="button" class="btn secondary" id="modal-neu-uebersetzen">Automatisch übersetzen</button><button type="button" class="btn" id="modal-textde-speichern">Deutschen Text speichern</button></div>
-          ${m.uebersetzung==='ausstehend'?`<div class="hinweisbox warnung" style="margin:8px 0 0">Die automatische Übersetzung war nicht erreichbar. Bitte deutschen Text von Hand eintragen oder erneut übersetzen.</div>`:''}
+          <div class="uebers-aktionen"><button type="button" class="btn" id="modal-textde-speichern">Korrektur speichern</button><button type="button" class="btn secondary" id="modal-neu-uebersetzen">Neu übersetzen</button></div>
+          ${m.uebersetzung==='ausstehend'?`<div class="hinweisbox warnung" style="margin:8px 0 0">Übersetzung noch nicht erreichbar – die App versucht es automatisch erneut${m.naechsterVersuch?` (nächster Versuch um ${new Date(m.naechsterVersuch).toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'})})`:''}. Es ist nichts zu tun.<br><span class="nr" style="font-size:11px">${esc(m.fehler||'')}</span></div>`:''}
         </div>`}</dd>
       <dt>Gemeldet</dt><dd>${datum(m.gemeldet)} · ${esc(m.hwName)} (${esc(m.pnr)})</dd>
       <dt>E-Mail</dt><dd><span class="nr">${esc(MAIL_EMPFAENGER)}</span><br>${mailHtml(m)}</dd>
@@ -1540,6 +1569,7 @@ function route(){
     $$('.view').forEach(e=>e.classList.toggle('aktiv',e.id==='view-'+ziel));
     $$('#nav a').forEach(a=>a.classList.toggle('aktiv',a.dataset.view===ziel));
     $('#sidebar').classList.remove('offen'); renderAdmin(); window.scrollTo(0,0);
+    MELDUNGEN.filter(m=>m.uebersetzung==='ausstehend').forEach(m=>uebersetzeMeldung(m));
   }
   if(istAdmin&&!adminOk) setTimeout(()=>$('#admin-code').focus(),50);
 }
