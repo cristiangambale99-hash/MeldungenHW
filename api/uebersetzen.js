@@ -1,35 +1,6 @@
-// Vercel Serverless Function: übersetzt die Texte der Hauswarte automatisch ins Deutsche.
-// 1. Wahl: DeepL (Umgebungsvariable DEEPL_API_KEY, Free-Keys enden auf ":fx").
-// Ohne Schlüssel oder bei einer Störung von DeepL springt automatisch ein Ersatzdienst ein,
-// damit IMMER übersetzt wird. Für den Dauerbetrieb wird DeepL empfohlen (Qualität, Datenschutz).
+// Vercel Serverless Function: übersetzt Texte ins Deutsche (DeepL, sonst Ersatzdienst).
 // Test im Browser: /api/uebersetzen?test=Buongiorno
-
-import { fachbegriffe } from '../lib/glossar.js';
-const schweiz = s => fachbegriffe(s);
-
-async function deepl(texte, key) {
-  const base = key.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com';
-  const r = await fetch(base + '/v2/translate', {
-    method: 'POST',
-    headers: { Authorization: 'DeepL-Auth-Key ' + key, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text: texte, target_lang: 'DE', preserve_formatting: true })
-  });
-  if (!r.ok) throw new Error('DeepL ' + r.status);
-  const tr = (await r.json()).translations || [];
-  return { texte_de: tr.map(t => schweiz(t.text)), sprache: (tr[0] && tr[0].detected_source_language) || '', dienst: 'DeepL' };
-}
-
-async function ersatz(texte) {
-  const texte_de = []; let sprache = '';
-  for (const t of texte) {
-    const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=de&dt=t&q=' + encodeURIComponent(t));
-    if (!r.ok) throw new Error('Ersatzdienst ' + r.status);
-    const j = await r.json();
-    texte_de.push(schweiz((j[0] || []).map(x => x[0]).join('')));
-    if (!sprache) sprache = String(j[2] || '').toUpperCase();
-  }
-  return { texte_de, sprache, dienst: 'Ersatz' };
-}
+import { uebersetzeTexte } from '../lib/uebersetzung.js';
 
 export default async function handler(req, res) {
   let texte;
@@ -43,11 +14,6 @@ export default async function handler(req, res) {
 
   if (!texte.length) return res.status(400).json({ error: 'Text fehlt' });
   if (texte.length > 10 || texte.join('').length > 8000) return res.status(413).json({ error: 'Text zu lang' });
-
-  const fehler = [];
-  const key = process.env.DEEPL_API_KEY;
-  if (key) { try { return res.status(200).json(await deepl(texte, key)); } catch (e) { fehler.push(String(e.message || e)); } }
-  try { const j = await ersatz(texte); return res.status(200).json({ ...j, text_de: j.texte_de[0] }); }
-  catch (e) { fehler.push(String(e.message || e)); }
-  return res.status(502).json({ error: 'Übersetzung nicht erreichbar', details: fehler });
+  try { const j = await uebersetzeTexte(texte); return res.status(200).json({ ...j, text_de: j.texte_de[0] }); }
+  catch (e) { return res.status(502).json({ error: 'Übersetzung nicht erreichbar', details: e.details || [String(e.message || e)] }); }
 }
