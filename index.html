@@ -1,8 +1,12 @@
 <!doctype html>
 <html lang="de-CH">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,interactive-widget=resizes-content">
 <meta name="theme-color" content="#0E4344">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Hauswartung">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png">
 <title>Hauswartung · Clean Service</title>
 <style>
 /* Clean Service Scaramuzzo AG – internes App-Layout (/cs-app) · v1.0 · Sept. 2026 */
@@ -127,6 +131,10 @@ a{color:var(--cs-tuerkis-dunkel)}
 <style>
 /* App-spezifische Ergänzungen Hauswartung – nur mit var(--cs-*) */
 [hidden]{display:none!important}
+html{scroll-padding-bottom:170px;scroll-padding-top:80px}
+.hw button,.hw select,.hw label,.hw a{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.hw .kachel,.hw .btn,.hw .haupt-aktion,.hw .neben-aktion{-webkit-user-select:none;user-select:none}
+.hw{overscroll-behavior-y:contain}
 img.brand-logo{width:100%;max-width:168px}
 
 /* =========================================================
@@ -134,13 +142,15 @@ img.brand-logo{width:100%;max-width:168px}
    ========================================================= */
 .hw{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;background:var(--cs-bg)}
 .hw-top{background:var(--cs-petrol);color:#fff;padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:10}
-.hw-top img.brand-logo{width:104px;padding:5px 7px}
-.hw-top-titel{font-size:12.5px;font-weight:bold;line-height:1.3;min-width:0}
+.hw-top img.brand-logo{width:96px;padding:5px 7px;flex:none}
+.hw-top-titel{font-size:12.5px;font-weight:bold;line-height:1.3;min-width:0;flex:1;overflow:hidden}
 .hw-top-titel span{display:block;font-weight:normal;color:#CFE6E6;font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hw-top-rechts{margin-left:auto}
-.sprache{display:flex;gap:2px;background:rgba(255,255,255,.08);border-radius:var(--cs-radius-s);padding:2px}
-.sprache button{font:inherit;font-size:11px;font-weight:bold;min-width:30px;min-height:32px;border:0;border-radius:4px;background:transparent;color:#CFE6E6;cursor:pointer}
-.sprache button.aktiv{background:var(--cs-tuerkis);color:#fff}
+.hw-top-rechts{margin-left:auto;flex:none}
+.sprache-wahl{position:relative;display:flex;align-items:center;gap:4px;min-height:44px;padding:0 10px;border-radius:var(--cs-radius-s);background:rgba(255,255,255,.1);color:#fff}
+.sprache-wahl svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.75;flex:none}
+.sprache-wahl select{font:inherit;font-size:16px;font-weight:bold;color:#fff;background:transparent;border:0;-webkit-appearance:none;appearance:none;padding:0 2px;min-height:44px;cursor:pointer}
+.sprache-wahl select option{color:#16292A}
+.sprache-wahl:focus-within{outline:2px solid var(--cs-tuerkis)}
 .hw-body{flex:1;width:100%;max-width:560px;margin:0 auto;padding:24px 16px 150px}
 .hw-screen{display:none}
 .hw-screen.aktiv{display:block}
@@ -174,11 +184,26 @@ img.brand-logo{width:100%;max-width:168px}
 .kachel.gewaehlt{border-color:var(--cs-tuerkis-dunkel);background:var(--cs-tuerkis-hell);box-shadow:inset 0 0 0 1px var(--cs-tuerkis-dunkel)}
 .kacheln.zwei .kachel{min-height:56px;font-size:14px;padding:12px 14px}
 .kachel.art{min-height:84px}
+.start-arten{margin-bottom:16px}
+.start-arten .kachel.art{min-height:96px;font-size:16px;box-shadow:0 2px 8px rgba(22,41,42,.05)}
+.start-arten .kachel.art .art-icon{width:52px;height:52px}
+.start-arten .kachel.art .pfeil{margin-left:auto;width:22px;height:22px;stroke:var(--cs-text-weich)}
+.wann-box{margin-top:20px}
+.entwurf-karte{width:100%;display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 8px 10px 16px;margin-bottom:12px;border:2px solid var(--cs-warnung);border-radius:14px;background:var(--cs-warnung-hell);font:inherit;text-align:left;color:var(--cs-text);cursor:pointer}
+.entwurf-karte svg{width:24px;height:24px;stroke:#8F6212;fill:none;stroke-width:1.75;flex:none}
+.entwurf-karte b{display:block;font-size:15px}
+.entwurf-karte small{display:block;font-size:12.5px;color:var(--cs-text-weich)}
+.entwurf-verwerfen{margin-left:auto;min-width:44px;min-height:44px;display:grid;place-items:center;font-size:22px;color:var(--cs-text-weich);border-radius:50%}
+.wann-box .zeit-reihe{grid-template-columns:1fr}
+.wann-box .zeit-paar{max-width:220px}
 .kachel.art .art-icon{width:44px;height:44px;border-radius:10px;display:grid;place-items:center;flex:none;background:var(--cs-tuerkis-hell)}
 .kachel.art.pikett .art-icon{background:var(--cs-warnung-hell)} .kachel.art.pikett .art-icon svg{stroke:#8F6212}
 .kachel.art.intern .art-icon{background:#EEF2F2} .kachel.art.intern .art-icon svg{stroke:var(--cs-text-weich)}
 .objektliste{display:flex;flex-direction:column;gap:8px}
 .objektliste .kachel{min-height:64px;font-size:14.5px}
+.ort-kopf{position:sticky;top:128px;background:var(--cs-bg);z-index:2;margin:10px 0 0;padding:8px 2px;background:var(--cs-bg);font-size:12px;font-weight:bold;color:var(--cs-tuerkis-dunkel);border-bottom:1px solid var(--cs-rahmen)}
+.ort-kopf:first-child{margin-top:0}
+.suchfeld{position:sticky;top:72px;z-index:3;box-shadow:0 -12px 0 4px var(--cs-bg),0 6px 12px -6px rgba(22,41,42,.12)}
 .objekt-gewaehlt{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--cs-radius);background:var(--cs-tuerkis-hell);margin-bottom:8px;font-size:13px}
 .objekt-gewaehlt svg{width:22px;height:22px;stroke:var(--cs-tuerkis-dunkel);fill:none;stroke-width:1.75;flex:none}
 .objekt-gewaehlt strong{display:block;font-size:14px}
@@ -210,23 +235,28 @@ img.brand-logo{width:100%;max-width:168px}
 .foto-knopf{display:flex;align-items:center;justify-content:center;gap:12px;min-height:64px;border:2px dashed var(--cs-tuerkis);border-radius:var(--cs-radius);background:var(--cs-tuerkis-hell);color:var(--cs-tuerkis-dunkel);font-weight:bold;font-size:15px;cursor:pointer}
 .foto-knopf svg{width:26px;height:26px;stroke:currentColor;fill:none;stroke-width:1.75}
 .foto-knopf input{display:none}
+.foto-knoepfe{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.foto-knopf.zweit{border-style:solid;border-color:var(--cs-rahmen);background:#fff;color:var(--cs-text)}
+.foto-knopf{padding:8px;text-align:center;flex-direction:column;gap:4px;min-height:76px;font-size:14px;line-height:1.25}
 .fotos{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
 .fotos div{position:relative}
 .fotos img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:var(--cs-radius-s);border:1px solid var(--cs-rahmen);display:block}
 .fotos button{position:absolute;top:4px;right:4px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(14,67,68,.8);color:#fff;font-size:16px;cursor:pointer}
 
 .pruefliste{background:#fff;border:1px solid var(--cs-rahmen);border-radius:var(--cs-radius);overflow:hidden;margin:0}
-.pruefliste div{display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--cs-rahmen);align-items:flex-start}
+.pruefliste div{display:grid;grid-template-columns:1fr auto;column-gap:8px;padding:10px 6px 10px 16px;border-bottom:1px solid var(--cs-rahmen);align-items:center}
 .pruefliste div:last-child{border-bottom:0}
-.pruefliste dt{flex:0 0 96px;color:var(--cs-text-weich);font-size:13px}
-.pruefliste dd{margin:0;flex:1;font-size:14px;word-break:break-word}
-.pruefliste .aendern{margin-left:auto;background:none;border:0;color:var(--cs-tuerkis-dunkel);font:inherit;font-size:12.5px;font-weight:bold;cursor:pointer;padding:4px 0;min-height:32px}
+.pruefliste dt{grid-column:1;color:var(--cs-text-weich);font-size:12px}
+.pruefliste dd{grid-column:1;margin:2px 0 0;font-size:15px;line-height:1.4;word-break:break-word}
+.pruefliste .aendern{grid-column:2;grid-row:1 / span 2;background:none;border:0;color:var(--cs-tuerkis-dunkel);font:inherit;font-size:13px;font-weight:bold;cursor:pointer;padding:0 10px;min-height:44px;min-width:64px;border-radius:var(--cs-radius-s)}
+.pruefliste .aendern:active{background:var(--cs-tuerkis-hell)}
 
 .hw-fuss{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--cs-rahmen);padding:12px 16px;padding-bottom:max(12px,env(safe-area-inset-bottom));z-index:10}
 .hw-fuss-inner{max-width:560px;margin:0 auto;display:flex;gap:10px}
 .hw-fuss .btn{min-height:56px;font-size:16px;border-radius:var(--cs-radius)}
 .hw-fuss .btn.primary-action{flex:1}
 .hw-fuss .btn.zurueck{flex:0 0 auto;padding:0 18px}
+.hw-fuss.nur-zurueck .btn.zurueck{flex:1}
 .hw-fehler{max-width:560px;margin:0 auto 10px;padding:14px 16px;border-radius:var(--cs-radius-s);background:var(--cs-negativ-hell);border-left:4px solid var(--cs-negativ);color:var(--cs-negativ);font-weight:bold;font-size:14px}
 
 .erfolg{text-align:center;padding:32px 0}
@@ -239,7 +269,7 @@ img.brand-logo{width:100%;max-width:168px}
 .meldung strong{font-size:14px}
 .meldung p{margin:4px 0 0;color:var(--cs-text-weich);font-size:13px}
 .meldung.pikett{box-shadow:inset 4px 0 0 var(--cs-warnung)}
-.admin-link{display:block;text-align:center;margin-top:48px;font-size:12px;color:var(--cs-text-weich)}
+.admin-link{display:flex;align-items:center;justify-content:center;min-height:44px;text-align:center;margin-top:40px;font-size:12px;color:var(--cs-text-weich)}
 .knopf-link{background:none;border:0;width:100%;font:inherit;cursor:pointer;text-decoration:underline;min-height:44px}
 
 /* =========================================================
@@ -356,9 +386,8 @@ img.brand-logo{width:100%;max-width:168px}
     <img class="brand-logo" src="data:image/png;base64,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" alt="Clean Service by Scaramuzzo">
     <div class="hw-top-titel" id="hw-top-titel">Hauswartung</div>
     <div class="hw-top-rechts">
-      <div class="sprache" id="sprache" role="group" aria-label="Sprache">
-        <button data-l="de">DE</button><button data-l="it">IT</button><button data-l="pt">PT</button><button data-l="es">ES</button>
-      </div>
+      <label class="sprache-wahl"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>
+        <select id="sprache" aria-label="Sprache / Lingua / Língua / Idioma"><option value="de">DE</option><option value="it">IT</option><option value="pt">PT</option><option value="es">ES</option></select></label>
     </div>
   </header>
 
@@ -373,14 +402,15 @@ img.brand-logo{width:100%;max-width:168px}
     <section class="hw-screen" data-screen="start">
       <h1 id="hw-hallo"></h1>
       <p class="lead" data-t="start_text"></p>
-      <button class="haupt-aktion" id="hw-neu"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="neue_meldung"></span></button>
+      <button class="entwurf-karte" id="hw-entwurf" hidden><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg><span><b data-t="entwurf_titel"></b><small id="hw-entwurf-info"></small></span><span class="entwurf-verwerfen" id="hw-entwurf-weg" role="button" aria-label="Verwerfen">×</span></button>
+      <div class="kacheln start-arten" id="hw-start-arten"></div>
       <button class="neben-aktion" id="hw-meine"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg><span data-t="meine_meldungen"></span><span class="tag" id="hw-meine-zahl">0</span></button>
       <button class="admin-link knopf-link" id="hw-logout" data-t="abmelden"></button>
     </section>
 
     <!-- 1 Objekt -->
     <section class="hw-screen" data-screen="s1">
-      <div class="fortschritt"><div class="fortschritt-text" data-schritt="1"></div><div class="fortschritt-balken"></div></div>
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
       <h1 data-t="s1_titel"></h1>
       <p class="lead" data-t="s1_text"></p>
       <input class="suchfeld" id="hw-objekt-suche" type="search" autocomplete="off">
@@ -389,7 +419,7 @@ img.brand-logo{width:100%;max-width:168px}
 
     <!-- 2 Hausnummer + Ort (+ Mieter) -->
     <section class="hw-screen" data-screen="s2">
-      <div class="fortschritt"><div class="fortschritt-text" data-schritt="2"></div><div class="fortschritt-balken"></div></div>
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
       <h1 data-t="s2_titel"></h1>
       <div class="objekt-gewaehlt" id="hw-objekt-info"></div>
       <div class="feld-titel" data-t="hausnr"></div>
@@ -405,25 +435,38 @@ img.brand-logo{width:100%;max-width:168px}
       <div class="aufklappen" id="hw-andere-box" hidden>
         <div class="feld-titel" data-t="andere_titel"></div>
         <input class="gross-input" id="hw-andere" autocomplete="off" maxlength="80">
+        <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
       </div>
     </section>
 
-    <!-- 4 Art der Meldung (+ Pikett) -->
-    <section class="hw-screen" data-screen="s4">
-      <div class="fortschritt"><div class="fortschritt-text" data-schritt="3"></div><div class="fortschritt-balken"></div></div>
-      <h1 data-t="s4_titel"></h1>
-      <p class="lead" data-t="s4_text"></p>
-      <div class="kacheln" id="hw-arten"></div>
-      <div class="aufklappen" id="hw-unterart-box" hidden>
-        <div class="feld-titel" id="hw-unterart-titel"></div>
-        <div class="kacheln zwei" id="hw-unterarten"></div>
-        <div id="hw-unterart-andere-box" hidden style="margin-top:12px">
-          <div class="feld-titel" data-t="unterart_andere"></div>
-          <input class="gross-input" id="hw-unterart-andere" autocomplete="off" maxlength="80">
+    <!-- Was ist los? (Verwaltung) / Was und wann? (Intern) -->
+    <section class="hw-screen" data-screen="sWas">
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
+      <h1 id="hw-was-titel"></h1>
+      <p class="lead" data-t="was_text"></p>
+      <div class="kacheln zwei" id="hw-unterarten"></div>
+      <div class="aufklappen" id="hw-unterart-andere-box" hidden>
+        <div class="feld-titel" data-t="unterart_andere"></div>
+        <input class="gross-input" id="hw-unterart-andere" autocomplete="off" maxlength="80">
+        <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
+      </div>
+      <div class="pikett-box wann-box" id="hw-intern-wann" hidden>
+        <div class="feld-titel" data-t="i_wann"></div>
+        <div class="zeit-reihe">
+          <div><label for="hw-i-datum" data-t="p_datum"></label><select id="hw-i-datum" class="zeit-select"></select></div>
+          <div><label for="hw-i-h" data-t="i_zeit"></label><div class="zeit-paar"><select id="hw-i-h" class="zeit-select" aria-label="Stunde"></select><span>:</span><select id="hw-i-m" class="zeit-select" aria-label="Minute"></select></div></div>
         </div>
       </div>
-      <div class="pikett-box" id="hw-pikett" hidden>
-        <div style="margin-bottom:14px"><label for="hw-p-auftrag" data-t="p_auftrag"></label><input type="text" id="hw-p-auftrag" autocomplete="off" maxlength="80"></div>
+    </section>
+
+    <!-- Einsatz (Pikett) -->
+    <section class="hw-screen" data-screen="sEinsatz">
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
+      <h1 data-t="einsatz_titel"></h1>
+      <p class="lead" data-t="einsatz_text"></p>
+      <div class="feld-titel" data-t="p_auftrag"></div>
+      <input class="gross-input" type="text" id="hw-p-auftrag" autocomplete="off" maxlength="80">
+      <div class="pikett-box">
         <div class="feld-titel" data-t="pikett_titel"></div>
         <div style="margin-bottom:10px"><label for="hw-p-datum" data-t="p_datum"></label><select id="hw-p-datum" class="zeit-select"></select></div>
         <div class="zeit-reihe">
@@ -436,19 +479,22 @@ img.brand-logo{width:100%;max-width:168px}
 
     <!-- 5 Beschreibung + Fotos -->
     <section class="hw-screen" data-screen="s5">
-      <div class="fortschritt"><div class="fortschritt-text" data-schritt="4"></div><div class="fortschritt-balken"></div></div>
-      <h1 data-t="s5_titel"></h1>
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
+      <h1 id="hw-s5-titel"></h1>
       <p class="lead" id="hw-s5-text"></p>
       <textarea class="gross-text" id="hw-text"></textarea>
       <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
       <div class="feld-titel"><span data-t="fotos"></span> <span class="opt" data-t="optional"></span></div>
-      <label class="foto-knopf"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span data-t="foto_knopf"></span><input type="file" id="hw-foto" accept="image/*" capture="environment" multiple></label>
+      <div class="foto-knoepfe">
+        <label class="foto-knopf"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span data-t="foto_knopf"></span><input type="file" id="hw-foto" accept="image/*" capture="environment"></label>
+        <label class="foto-knopf zweit"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg><span data-t="foto_galerie"></span><input type="file" id="hw-foto-galerie" accept="image/*" multiple></label>
+      </div>
       <div class="fotos" id="hw-fotos"></div>
     </section>
 
     <!-- 6 Prüfen -->
     <section class="hw-screen" data-screen="s6">
-      <div class="fortschritt"><div class="fortschritt-text" data-schritt="5"></div><div class="fortschritt-balken"></div></div>
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
       <h1 data-t="s6_titel"></h1>
       <p class="lead" data-t="s6_text"></p>
       <dl class="pruefliste" id="hw-pruef"></dl>
@@ -461,7 +507,7 @@ img.brand-logo{width:100%;max-width:168px}
         <p class="lead" data-t="ok_text"></p>
         <div class="nummer" id="hw-ok-nr"></div>
       </div>
-      <button class="haupt-aktion" id="hw-ok-neu"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="weitere"></span></button>
+      <button class="haupt-aktion" id="hw-ok-neu"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span data-t="weitere_objekt"></span></button>
       <button class="neben-aktion" id="hw-ok-start"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg><span data-t="fertig"></span></button>
     </section>
 
@@ -793,7 +839,7 @@ const UNTERARTEN = {
 const ARTEN = [
   {id:'verwaltung', kurz:'Verwaltung', tag:'',
    n:{de:'Meldung (Verwaltung)',it:'Segnalazione (amministrazione)',pt:'Comunicação (administração)',es:'Aviso (administración)'},
-   d:{de:'Wird an die Verwaltung gemeldet',it:'Viene inviata all’amministrazione',pt:'É enviada à administração',es:'Se envía a la administración'},
+   d:{de:'Schaden, Defekt, Abfall … an die Verwaltung',it:'Danno, guasto, rifiuti … all’amministrazione',pt:'Dano, avaria, lixo … à administração',es:'Daño, avería, basura … a la administración'},
    icon:'<path d="M4 5h16v14H4z"/><path d="M4 7l8 6 8-6"/>'},
   {id:'pikett', kurz:'Pikett', tag:'pikett',
    n:{de:'Pikettdienst (Verwaltung)',it:'Servizio di picchetto (amministrazione)',pt:'Serviço de piquete (administração)',es:'Servicio de guardia (administración)'},
@@ -801,7 +847,7 @@ const ARTEN = [
    icon:'<circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/>'},
   {id:'intern', kurz:'Intern', tag:'intern',
    n:{de:'Meldung intern',it:'Segnalazione interna',pt:'Comunicação interna',es:'Aviso interno'},
-   d:{de:'Nur für Clean Service',it:'Solo per Clean Service',pt:'Só para a Clean Service',es:'Solo para Clean Service'},
+   d:{de:'Erledigte Arbeiten und Infos für Clean Service',it:'Lavori svolti e info per Clean Service',pt:'Trabalhos feitos e info para a Clean Service',es:'Trabajos hechos e info para Clean Service'},
    icon:'<path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/>'}
 ];
 const STATUS = [
@@ -818,11 +864,12 @@ const isoTag = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')
 let MELDUNGEN = [
   {nr:1043, objekt:'777',  hausnr:'64', ort:'treppenhaus', mieter:'', bereich:'eg', art:'pikett', unterart:'', pikett:{datum:isoTag(tage(-1)),von:'21:15',bis:'23:00',auftraggeber:'Verwaltung, Herr Meier'}, text:'Perdita d’acqua nel vano scale. Chiuso il rubinetto principale, asciugato l’acqua, idraulico avvisato per domani.', textDe:'Wasserleck im Treppenhaus. Haupthahn geschlossen, Wasser aufgenommen, Sanitär für morgen aufgeboten.', sprache:'IT', uebersetzung:'ok', status:'neu', gemeldet:tage(-1), pnr:'32675', hwName:'Arcolia, Mattia', fotos:[]},
   {nr:1042, objekt:'162',  hausnr:'2',  ort:'mieter', mieter:'Huber', bereich:'2og', art:'verwaltung', unterart:'defekt', pikett:null, text:'Storen im Wohnzimmer lässt sich nicht mehr hochfahren, Kurbel blockiert.', status:'neu', gemeldet:tage(0), pnr:'40796', hwName:'Procacci, Nicolangelo', fotos:[]},
-  {nr:1041, objekt:'230',  hausnr:'5',  ort:'technikraum', mieter:'', bereich:'1ug', art:'intern', unterart:'andere', unterartAndere:'Material auffüllen', pikett:null, text:'Reinigungsmaterial im Technikraum auffüllen.', status:'inarbeit', gemeldet:tage(-2), pnr:'32675', hwName:'Arcolia, Mattia', fotos:[]},
+  {nr:1041, objekt:'230',  hausnr:'', ort:null, mieter:'', bereich:null, intern:{datum:isoTag(tage(-2)),zeit:'14:30'}, art:'intern', unterart:'rohrreinigung', unterartAndere:'', pikett:null, text:'Ablauf Waschküche gespült, läuft wieder normal ab.', status:'inarbeit', gemeldet:tage(-2), pnr:'32675', hwName:'Arcolia, Mattia', fotos:[]},
   {nr:1040, objekt:'1821', hausnr:'12', ort:'waschkueche', mieter:'', bereich:'1ug', art:'verwaltung', unterart:'defekt', pikett:null, text:'Tumbler zeigt Fehler F21 und startet nicht.', status:'erledigt', gemeldet:tage(-4), pnr:'40796', hwName:'Procacci, Nicolangelo', fotos:[]},
   {nr:1039, objekt:'3266', hausnr:'24', ort:'tiefgarage', mieter:'', bereich:'2ug', art:'pikett', unterart:'', pikett:{datum:isoTag(tage(-6)),von:'06:30',bis:'08:05',auftraggeber:'Mieterin Frau Keller'}, text:'Garagentor öffnet nicht, Mieter eingeschlossen. Tor manuell entriegelt, Steuerung zurückgesetzt.', status:'erledigt', gemeldet:tage(-6), pnr:'40796', hwName:'Procacci, Nicolangelo', fotos:[]}
 ];
 
+MELDUNGEN.forEach(m=>{ m.mail='gesendet'; m.mailZeit=new Date(m.gemeldet); });
 MELDUNGEN.forEach(m=>{ if(m.textDe===undefined){ m.textDe=m.text; m.sprache='DE'; m.uebersetzung='nicht_noetig'; } });
 
 /* =====================================================================
@@ -830,15 +877,15 @@ MELDUNGEN.forEach(m=>{ if(m.textDe===undefined){ m.textDe=m.text; m.sprache='DE'
    ===================================================================== */
 const T = {
 de:{login_titel:'Anmelden',login_text:'Bitte gib deine Personalnummer ein.',admin_link:'Admin-Bereich',weiter:'Weiter',zurueck:'Zurück',anmelden:'Anmelden',
-  hallo:'Hallo',start_text:'Was möchtest du tun?',neue_meldung:'Neue Meldung',meine_meldungen:'Meine Meldungen',abmelden:'Abmelden',
-  schritt:'Schritt {n} von 5',
+  hallo:'Hallo',start_text:'Was möchtest du melden?',neue_meldung:'Neue Meldung',meine_meldungen:'Meine Meldungen',abmelden:'Abmelden',
+  schritt:'Schritt {n} von {m}',
   s1_titel:'Welches Objekt?',s1_text:'Tippe auf das Objekt. Oder suche nach Strasse, Ort oder Objektnummer.',suche:'Strasse, Ort oder Nummer …',keine_treffer:'Kein Objekt gefunden.',
   s2_titel:'Wo genau?',hausnr:'Hausnummer',hausnr_ph:'z. B. 17a',ort_titel:'Bereich',stockwerk_titel:'Stockwerk',mieter_name:'Name des Mieters',mieter_ph:'Nachname des Mieters',andere_titel:'Welcher Bereich genau?',andere_ph:'z. B. Dachboden, Lift, Briefkastenanlage',e_andere:'Bitte gib an, welcher Bereich gemeint ist.',
-  s3_titel:'Welches Stockwerk?',s3_text:'Tippe auf das Stockwerk oder den Aussenbereich.',unterart_titel_verwaltung:'Was für eine Meldung?',unterart_titel_intern:'Was für eine Art Information?',unterart_andere:'Was genau?',p_auftrag_ph:'z. B. Verwaltung Frau Müller',p_auftrag:'Von wem hast du den Auftrag erhalten?',e_unterart_verwaltung:'Bitte tippe auf die Art der Meldung.',e_unterart_intern:'Bitte tippe auf die Art der Information.',e_unterart_andere:'Bitte schreibe kurz, worum es geht.',e_auftrag:'Bitte gib an, von wem du den Auftrag erhalten hast.',
+  s3_titel:'Welches Stockwerk?',s3_text:'Tippe auf das Stockwerk oder den Aussenbereich.',unterart_titel_verwaltung:'Was ist los?',unterart_titel_intern:'Was für eine Information?',was_text:'Tippe auf das Passende.',i_wann:'Wann?',i_zeit:'Uhrzeit',einsatz_titel:'Dein Einsatz',einsatz_text:'Wer hat dich aufgeboten und wie lange warst du im Einsatz?',s5_titel_pikett:'Was hast du gemacht?',s5_titel_intern:'Bemerkung',s5_text_intern:'Freiwillig: Möchtest du noch etwas ergänzen?',f_was:'Was',f_zeit:'Zeitpunkt',f_bemerkung:'Bemerkung',e_zeit:'Bitte gib Datum und Uhrzeit an.',weitere_objekt:'Weitere Meldung zum gleichen Objekt',art_wechseln:'Art der Meldung ändern? Du beginnst dann auf der Startseite neu.',unterart_andere:'Was genau?',p_auftrag_ph:'z. B. Verwaltung Frau Müller',p_auftrag:'Von wem hast du den Auftrag erhalten?',e_unterart_verwaltung:'Bitte tippe auf die Art der Meldung.',e_unterart_intern:'Bitte tippe auf die Art der Information.',e_unterart_andere:'Bitte schreibe kurz, worum es geht.',e_auftrag:'Bitte gib an, von wem du den Auftrag erhalten hast.',
   s4_titel:'Art der Meldung',s4_text:'Tippe auf die passende Art.',
   pikett_titel:'Wann warst du im Einsatz?',p_datum:'Datum',p_von:'Von',p_bis:'Bis',heute:'Heute',gestern:'Gestern',p_dauer:'Einsatzdauer',
   s5_titel:'Was ist passiert?',sprache_hinweis:'Du kannst in deiner Sprache schreiben – wir übersetzen automatisch.',s5_text:'Beschreibe kurz: Was hast du festgestellt?',s5_text_pikett:'Beschreibe kurz: Was war los und was hast du gemacht?',text_ph:'z. B. Lampe im 2. OG brennt nicht',
-  fotos:'Fotos',optional:'(freiwillig)',foto_knopf:'Foto aufnehmen',
+  fotos:'Fotos',optional:'(freiwillig)',foto_knopf:'Foto aufnehmen',foto_galerie:'Aus Galerie',entwurf_titel:'Angefangene Meldung fortsetzen',
   s6_titel:'Alles richtig?',s6_text:'Prüfe deine Angaben und tippe auf «Senden».',senden:'Senden',aendern:'Ändern',
   f_objekt:'Objekt',f_ort:'Bereich',f_bereich:'Stockwerk',f_auftrag:'Auftrag von',f_art:'Art',f_einsatz:'Einsatz',f_text:'Beschreibung',f_fotos:'Fotos',
   ok_titel:'Danke! Meldung gesendet.',ok_text:'Die Leitung Hauswartung ist informiert. Du musst nichts weiter tun.',ok_nr:'Meldung Nr. {n}',weitere:'Weitere Meldung',fertig:'Fertig',
@@ -847,15 +894,15 @@ de:{login_titel:'Anmelden',login_text:'Bitte gib deine Personalnummer ein.',admi
   e_bereich:'Bitte tippe auf ein Stockwerk.',e_art:'Bitte tippe auf die Art der Meldung.',e_pikett:'Bitte gib Datum, Von und Bis ein.',e_pikett_gleich:'Von und Bis dürfen nicht gleich sein.',e_pikett_zukunft:'Das Datum liegt in der Zukunft. Bitte prüfen.',e_text:'Bitte schreibe kurz, was passiert ist.',
   std:'Std.',min:'Min.'},
 it:{login_titel:'Accedi',login_text:'Inserisci il tuo numero personale.',admin_link:'Area admin',weiter:'Avanti',zurueck:'Indietro',anmelden:'Accedi',
-  hallo:'Ciao',start_text:'Cosa vuoi fare?',neue_meldung:'Nuova segnalazione',meine_meldungen:'Le mie segnalazioni',abmelden:'Esci',
-  schritt:'Passo {n} di 5',
+  hallo:'Ciao',start_text:'Cosa vuoi segnalare?',neue_meldung:'Nuova segnalazione',meine_meldungen:'Le mie segnalazioni',abmelden:'Esci',
+  schritt:'Passo {n} di {m}',
   s1_titel:'Quale stabile?',s1_text:'Tocca lo stabile. Oppure cerca per via, luogo o numero.',suche:'Via, luogo o numero …',keine_treffer:'Nessuno stabile trovato.',
   s2_titel:'Dove esattamente?',hausnr:'Numero civico',hausnr_ph:'es. 17a',ort_titel:'Zona',stockwerk_titel:'Piano',mieter_name:'Nome dell’inquilino',mieter_ph:'Cognome dell’inquilino',andere_titel:'Quale zona esattamente?',andere_ph:'es. solaio, ascensore, cassette postali',e_andere:'Indica di quale zona si tratta.',
-  s3_titel:'Quale piano?',s3_text:'Tocca il piano o l’esterno.',unterart_titel_verwaltung:'Che tipo di segnalazione?',unterart_titel_intern:'Che tipo di informazione?',unterart_andere:'Cosa esattamente?',p_auftrag_ph:'es. amministrazione, sig.ra Müller',p_auftrag:'Da chi hai ricevuto l’incarico?',e_unterart_verwaltung:'Tocca il tipo di segnalazione.',e_unterart_intern:'Tocca il tipo di informazione.',e_unterart_andere:'Scrivi brevemente di cosa si tratta.',e_auftrag:'Indica da chi hai ricevuto l’incarico.',
+  s3_titel:'Quale piano?',s3_text:'Tocca il piano o l’esterno.',unterart_titel_verwaltung:'Cosa succede?',unterart_titel_intern:'Che tipo di informazione?',was_text:'Tocca la voce giusta.',i_wann:'Quando?',i_zeit:'Ora',einsatz_titel:'Il tuo intervento',einsatz_text:'Chi ti ha chiamato e quanto è durato l’intervento?',s5_titel_pikett:'Cosa hai fatto?',s5_titel_intern:'Nota',s5_text_intern:'Facoltativo: vuoi aggiungere qualcosa?',f_was:'Cosa',f_zeit:'Momento',f_bemerkung:'Nota',e_zeit:'Indica data e ora.',weitere_objekt:'Altra segnalazione per lo stesso stabile',art_wechseln:'Cambiare il tipo di segnalazione? Ricominci dalla pagina iniziale.',unterart_andere:'Cosa esattamente?',p_auftrag_ph:'es. amministrazione, sig.ra Müller',p_auftrag:'Da chi hai ricevuto l’incarico?',e_unterart_verwaltung:'Tocca il tipo di segnalazione.',e_unterart_intern:'Tocca il tipo di informazione.',e_unterart_andere:'Scrivi brevemente di cosa si tratta.',e_auftrag:'Indica da chi hai ricevuto l’incarico.',
   s4_titel:'Tipo di segnalazione',s4_text:'Tocca il tipo corretto.',
   pikett_titel:'Quando sei intervenuto?',p_datum:'Data',p_von:'Da',p_bis:'A',heute:'Oggi',gestern:'Ieri',p_dauer:'Durata intervento',
   s5_titel:'Cosa è successo?',sprache_hinweis:'Puoi scrivere nella tua lingua – traduciamo automaticamente.',s5_text:'Descrivi brevemente cosa hai constatato.',s5_text_pikett:'Descrivi brevemente cosa è successo e cosa hai fatto.',text_ph:'es. la luce al 2° piano non funziona',
-  fotos:'Foto',optional:'(facoltativo)',foto_knopf:'Scatta foto',
+  fotos:'Foto',optional:'(facoltativo)',foto_knopf:'Scatta foto',foto_galerie:'Dalla galleria',entwurf_titel:'Continua la segnalazione iniziata',
   s6_titel:'Tutto corretto?',s6_text:'Controlla i dati e tocca «Invia».',senden:'Invia',aendern:'Modifica',
   f_objekt:'Stabile',f_ort:'Zona',f_bereich:'Piano',f_auftrag:'Incarico da',f_art:'Tipo',f_einsatz:'Intervento',f_text:'Descrizione',f_fotos:'Foto',
   ok_titel:'Grazie! Segnalazione inviata.',ok_text:'La direzione è informata. Non devi fare altro.',ok_nr:'Segnalazione n. {n}',weitere:'Altra segnalazione',fertig:'Fine',
@@ -864,15 +911,15 @@ it:{login_titel:'Accedi',login_text:'Inserisci il tuo numero personale.',admin_l
   e_bereich:'Tocca un piano.',e_art:'Tocca il tipo di segnalazione.',e_pikett:'Inserisci data, da e a.',e_pikett_gleich:'Da e A non possono essere uguali.',e_pikett_zukunft:'La data è nel futuro. Controlla.',e_text:'Scrivi brevemente cosa è successo.',
   std:'h',min:'min'},
 pt:{login_titel:'Entrar',login_text:'Introduz o teu número de pessoal.',admin_link:'Área admin',weiter:'Seguinte',zurueck:'Voltar',anmelden:'Entrar',
-  hallo:'Olá',start_text:'O que queres fazer?',neue_meldung:'Nova comunicação',meine_meldungen:'As minhas comunicações',abmelden:'Sair',
-  schritt:'Passo {n} de 5',
+  hallo:'Olá',start_text:'O que queres comunicar?',neue_meldung:'Nova comunicação',meine_meldungen:'As minhas comunicações',abmelden:'Sair',
+  schritt:'Passo {n} de {m}',
   s1_titel:'Qual edifício?',s1_text:'Toca no edifício. Ou procura por rua, localidade ou número.',suche:'Rua, localidade ou número …',keine_treffer:'Nenhum edifício encontrado.',
   s2_titel:'Onde exatamente?',hausnr:'Número da porta',hausnr_ph:'ex. 17a',ort_titel:'Zona',stockwerk_titel:'Piso',mieter_name:'Nome do inquilino',mieter_ph:'Apelido do inquilino',andere_titel:'Que zona exatamente?',andere_ph:'ex. sótão, elevador, caixas de correio',e_andere:'Indica de que zona se trata.',
-  s3_titel:'Que piso?',s3_text:'Toca no piso ou no exterior.',unterart_titel_verwaltung:'Que tipo de comunicação?',unterart_titel_intern:'Que tipo de informação?',unterart_andere:'O quê exatamente?',p_auftrag_ph:'ex. administração, Sra. Müller',p_auftrag:'Quem te deu o pedido?',e_unterart_verwaltung:'Toca no tipo de comunicação.',e_unterart_intern:'Toca no tipo de informação.',e_unterart_andere:'Escreve brevemente do que se trata.',e_auftrag:'Indica quem te deu o pedido.',
+  s3_titel:'Que piso?',s3_text:'Toca no piso ou no exterior.',unterart_titel_verwaltung:'O que se passa?',unterart_titel_intern:'Que tipo de informação?',was_text:'Toca na opção certa.',i_wann:'Quando?',i_zeit:'Hora',einsatz_titel:'O teu serviço',einsatz_text:'Quem te chamou e quanto tempo durou o serviço?',s5_titel_pikett:'O que fizeste?',s5_titel_intern:'Observação',s5_text_intern:'Opcional: queres acrescentar algo?',f_was:'O quê',f_zeit:'Momento',f_bemerkung:'Observação',e_zeit:'Indica data e hora.',weitere_objekt:'Outra comunicação para o mesmo edifício',art_wechseln:'Mudar o tipo de comunicação? Recomeças na página inicial.',unterart_andere:'O quê exatamente?',p_auftrag_ph:'ex. administração, Sra. Müller',p_auftrag:'Quem te deu o pedido?',e_unterart_verwaltung:'Toca no tipo de comunicação.',e_unterart_intern:'Toca no tipo de informação.',e_unterart_andere:'Escreve brevemente do que se trata.',e_auftrag:'Indica quem te deu o pedido.',
   s4_titel:'Tipo de comunicação',s4_text:'Toca no tipo certo.',
   pikett_titel:'Quando estiveste em serviço?',p_datum:'Data',p_von:'De',p_bis:'Até',heute:'Hoje',gestern:'Ontem',p_dauer:'Duração',
   s5_titel:'O que aconteceu?',sprache_hinweis:'Podes escrever na tua língua – traduzimos automaticamente.',s5_text:'Descreve brevemente o que verificaste.',s5_text_pikett:'Descreve brevemente o que aconteceu e o que fizeste.',text_ph:'ex. a luz no 2.º andar não funciona',
-  fotos:'Fotos',optional:'(opcional)',foto_knopf:'Tirar foto',
+  fotos:'Fotos',optional:'(opcional)',foto_knopf:'Tirar foto',foto_galerie:'Da galeria',entwurf_titel:'Continuar a comunicação iniciada',
   s6_titel:'Está tudo certo?',s6_text:'Verifica os dados e toca em «Enviar».',senden:'Enviar',aendern:'Alterar',
   f_objekt:'Edifício',f_ort:'Zona',f_bereich:'Piso',f_auftrag:'Pedido de',f_art:'Tipo',f_einsatz:'Serviço',f_text:'Descrição',f_fotos:'Fotos',
   ok_titel:'Obrigado! Comunicação enviada.',ok_text:'A chefia foi informada. Não precisas de fazer mais nada.',ok_nr:'Comunicação n.º {n}',weitere:'Outra comunicação',fertig:'Concluir',
@@ -881,15 +928,15 @@ pt:{login_titel:'Entrar',login_text:'Introduz o teu número de pessoal.',admin_l
   e_bereich:'Toca num piso.',e_art:'Toca no tipo de comunicação.',e_pikett:'Introduz data, de e até.',e_pikett_gleich:'De e Até não podem ser iguais.',e_pikett_zukunft:'A data está no futuro. Verifica.',e_text:'Escreve brevemente o que aconteceu.',
   std:'h',min:'min'},
 es:{login_titel:'Entrar',login_text:'Introduce tu número de personal.',admin_link:'Área admin',weiter:'Siguiente',zurueck:'Atrás',anmelden:'Entrar',
-  hallo:'Hola',start_text:'¿Qué quieres hacer?',neue_meldung:'Nuevo aviso',meine_meldungen:'Mis avisos',abmelden:'Salir',
-  schritt:'Paso {n} de 5',
+  hallo:'Hola',start_text:'¿Qué quieres avisar?',neue_meldung:'Nuevo aviso',meine_meldungen:'Mis avisos',abmelden:'Salir',
+  schritt:'Paso {n} de {m}',
   s1_titel:'¿Qué edificio?',s1_text:'Toca el edificio. O busca por calle, localidad o número.',suche:'Calle, localidad o número …',keine_treffer:'Ningún edificio encontrado.',
   s2_titel:'¿Dónde exactamente?',hausnr:'Número de portal',hausnr_ph:'p. ej. 17a',ort_titel:'Zona',stockwerk_titel:'Planta',mieter_name:'Nombre del inquilino',mieter_ph:'Apellido del inquilino',andere_titel:'¿Qué zona exactamente?',andere_ph:'p. ej. desván, ascensor, buzones',e_andere:'Indica de qué zona se trata.',
-  s3_titel:'¿Qué planta?',s3_text:'Toca la planta o el exterior.',unterart_titel_verwaltung:'¿Qué tipo de aviso?',unterart_titel_intern:'¿Qué tipo de información?',unterart_andere:'¿Qué exactamente?',p_auftrag_ph:'p. ej. administración, Sra. Müller',p_auftrag:'¿Quién te dio el encargo?',e_unterart_verwaltung:'Toca el tipo de aviso.',e_unterart_intern:'Toca el tipo de información.',e_unterart_andere:'Escribe brevemente de qué se trata.',e_auftrag:'Indica quién te dio el encargo.',
+  s3_titel:'¿Qué planta?',s3_text:'Toca la planta o el exterior.',unterart_titel_verwaltung:'¿Qué pasa?',unterart_titel_intern:'¿Qué tipo de información?',was_text:'Toca la opción correcta.',i_wann:'¿Cuándo?',i_zeit:'Hora',einsatz_titel:'Tu intervención',einsatz_text:'¿Quién te llamó y cuánto duró la intervención?',s5_titel_pikett:'¿Qué hiciste?',s5_titel_intern:'Observación',s5_text_intern:'Opcional: ¿quieres añadir algo?',f_was:'Qué',f_zeit:'Momento',f_bemerkung:'Observación',e_zeit:'Indica fecha y hora.',weitere_objekt:'Otro aviso para el mismo edificio',art_wechseln:'¿Cambiar el tipo de aviso? Empiezas de nuevo en la página inicial.',unterart_andere:'¿Qué exactamente?',p_auftrag_ph:'p. ej. administración, Sra. Müller',p_auftrag:'¿Quién te dio el encargo?',e_unterart_verwaltung:'Toca el tipo de aviso.',e_unterart_intern:'Toca el tipo de información.',e_unterart_andere:'Escribe brevemente de qué se trata.',e_auftrag:'Indica quién te dio el encargo.',
   s4_titel:'Tipo de aviso',s4_text:'Toca el tipo correcto.',
   pikett_titel:'¿Cuándo estuviste de guardia?',p_datum:'Fecha',p_von:'De',p_bis:'A',heute:'Hoy',gestern:'Ayer',p_dauer:'Duración',
   s5_titel:'¿Qué ha pasado?',sprache_hinweis:'Puedes escribir en tu idioma – traducimos automáticamente.',s5_text:'Describe brevemente lo que has visto.',s5_text_pikett:'Describe brevemente qué pasó y qué hiciste.',text_ph:'p. ej. la luz del 2.º piso no funciona',
-  fotos:'Fotos',optional:'(opcional)',foto_knopf:'Hacer foto',
+  fotos:'Fotos',optional:'(opcional)',foto_knopf:'Hacer foto',foto_galerie:'De la galería',entwurf_titel:'Continuar el aviso empezado',
   s6_titel:'¿Todo correcto?',s6_text:'Revisa los datos y toca «Enviar».',senden:'Enviar',aendern:'Cambiar',
   f_objekt:'Edificio',f_ort:'Zona',f_bereich:'Planta',f_auftrag:'Encargo de',f_art:'Tipo',f_einsatz:'Guardia',f_text:'Descripción',f_fotos:'Fotos',
   ok_titel:'¡Gracias! Aviso enviado.',ok_text:'La dirección está informada. No tienes que hacer nada más.',ok_nr:'Aviso n.º {n}',weitere:'Otro aviso',fertig:'Terminar',
@@ -936,36 +983,50 @@ const imMonat = m => m.art==='pikett' && m.pikett && m.pikett.datum.slice(0,7)==
    TEIL 1 · AUSSENDIENST
    ===================================================================== */
 let L='de', user=null, screen='login', entwurf;
-const leererEntwurf = () => ({objekt:null,hausnr:'',ort:null,mieter:'',andere:'',bereich:null,art:null,unterart:null,unterartAndere:'',pikett:{datum:isoTag(heute),von:'',bis:'',auftraggeber:''},text:'',fotos:[]});
+const jetztGerundet = () => { const d=new Date(); const m=Math.floor(d.getMinutes()/5)*5; return `${String(d.getHours()).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
+const leererEntwurf = (art=null) => ({objekt:null,hausnr:'',ort:null,mieter:'',andere:'',bereich:null,art,unterart:null,unterartAndere:'',pikett:{datum:isoTag(heute),von:'',bis:'',auftraggeber:''},intern:{datum:isoTag(heute),zeit:jetztGerundet()},text:'',fotos:[]});
 entwurf = leererEntwurf();
 const t = (k,n) => (T[L][k]??T.de[k]??k).replace('{n}',n??'');
-const REIHE = ['start','s1','s2','s4','s5','s6'];
-const FUSS = {login:{z:false,w:'anmelden'},s1:{z:true,w:'weiter'},s2:{z:true,w:'weiter'},s3:{z:true,w:'weiter'},s4:{z:true,w:'weiter'},s5:{z:true,w:'weiter'},s6:{z:true,w:'senden'},meine:{z:true,w:null}};
-$$('.fortschritt-balken').forEach(b=>b.innerHTML='<span></span>'.repeat(5));
+/* Ablauf je Art der Meldung – nur die Fragen, die es wirklich braucht */
+const ABLAUF = {
+  verwaltung:['s1','s2','sWas','s5','s6'],     /* Objekt · Wo genau · Was ist los · Beschreibung · Prüfen */
+  pikett:    ['s1','s2','sEinsatz','s5','s6'], /* Objekt · Wo genau · Einsatz · Einsatzbeschrieb · Prüfen */
+  intern:    ['s1','sWas','s5','s6']           /* Objekt · Was & wann · Bemerkung · Prüfen */
+};
+const ablauf = () => ABLAUF[entwurf.art] || ABLAUF.verwaltung;
+const FUSS = {login:{z:false,w:'anmelden'},s1:{z:true,w:null},s2:{z:true,w:'weiter'},sWas:{z:true,w:'weiter'},sEinsatz:{z:true,w:'weiter'},s5:{z:true,w:'weiter'},s6:{z:true,w:'senden'},meine:{z:true,w:null}};
 
 function uebersetze(){
   document.documentElement.lang = L==='de'?'de-CH':L;
   $$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
   $$('[data-schritt]').forEach(e=>e.textContent=t('schritt',e.dataset.schritt));
-  $$('#sprache button').forEach(b=>b.classList.toggle('aktiv',b.dataset.l===L));
+  $('#sprache').value=L;
   $('#hw-pnr').placeholder='00000'; $('#hw-objekt-suche').placeholder=t('suche');
   $('#hw-hausnr').placeholder=t('hausnr_ph'); $('#hw-mieter').placeholder=t('mieter_ph'); $('#hw-p-auftrag').placeholder=t('p_auftrag_ph'); $('#hw-andere').placeholder=t('andere_ph'); $('#hw-text').placeholder=t('text_ph');
   renderObjektliste(); renderOrte(); renderBereiche(); renderArten(); fuelleZeitauswahl(); renderDauer(); zeigeScreen(screen,true);
 }
-$('#sprache').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; L=b.dataset.l; try{localStorage.setItem('hw_lang',L)}catch(_){ } uebersetze();});
+$('#sprache').addEventListener('change',e=>{ L=e.target.value; try{localStorage.setItem('hw_lang',L)}catch(_){ } uebersetze(); });
 function fehlerHw(k){ const b=$('#hw-fehler'); b.hidden=!k; b.textContent=k?t(k):''; }
 
+let ausVerlauf=false;
 function zeigeScreen(s, still){
+  if(!still && !ausVerlauf && s!==screen && !location.hash.startsWith('#admin')){ try{ history.pushState({hw:s},''); }catch(_){ } }
   screen=s; if(!still) fehlerHw('');
   $$('.hw-screen').forEach(e=>e.classList.toggle('aktiv',e.dataset.screen===s));
   const f=FUSS[s]; $('#hw-fuss').hidden=!f;
+  $('#hw-fuss').classList.toggle('nur-zurueck',!!(f&&!f.w));
   if(f){ $('#hw-zurueck').hidden=!f.z; $('#hw-zurueck').textContent=t('zurueck'); $('#hw-weiter').hidden=!f.w; if(f.w) $('#hw-weiter').textContent=t(f.w); }
-  const n=REIHE.indexOf(s);
-  $$(`.hw-screen[data-screen="${s}"] .fortschritt-balken span`).forEach((b,i)=>b.classList.toggle('fertig',i<n));
+  const fl=ablauf(), n=fl.indexOf(s), sek=$(`.hw-screen[data-screen="${s}"]`);
+  if(n>=0 && sek.querySelector('.fortschritt')){
+    sek.querySelector('.fortschritt-text').textContent=`${nameVon(ARTEN,entwurf.art,L)} · ${t('schritt',n+1).replace('{m}',fl.length)}`;
+    sek.querySelector('.fortschritt-balken').innerHTML=fl.map((_,i)=>`<span class="${i<=n?'fertig':''}"></span>`).join('');
+  }
   $('#hw-top-titel').innerHTML = user ? `Hauswartung<span>${esc(hwAnzeige(user))}</span>` : 'Hauswartung';
-  if(s==='start'&&user){ $('#hw-hallo').textContent=`${t('hallo')} ${user.vorname}`; $('#hw-meine-zahl').textContent=MELDUNGEN.filter(m=>m.pnr===user.pnr&&offen(m)).length; }
+  if(SCHRITTE_MIT_ENTWURF.includes(s)) speichereEntwurf();
+  if(s==='start'&&user){ zeigeEntwurfKarte(); $('#hw-hallo').textContent=`${t('hallo')} ${user.vorname}`; $('#hw-meine-zahl').textContent=MELDUNGEN.filter(m=>m.pnr===user.pnr&&offen(m)).length; }
   if(s==='s2'&&entwurf.objekt){ const o=obj(entwurf.objekt); $('#hw-objekt-info').innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><div><strong>${esc(o.strasse)}</strong>${esc(o.ort)} · ${esc(o.kunde)}</div>`; }
-  if(s==='s5') $('#hw-s5-text').textContent = t(entwurf.art==='pikett'?'s5_text_pikett':'s5_text');
+  if(s==='sWas') renderUnterarten();
+  if(s==='s5'){ const k={pikett:'_pikett',intern:'_intern'}[entwurf.art]||''; $('#hw-s5-titel').textContent=t('s5_titel'+k); $('#hw-s5-text').textContent=t('s5_text'+k); }
   if(s==='s6') renderPruef();
   if(s==='meine'&&user) renderMeine();
   if(!still) window.scrollTo(0,0);
@@ -976,22 +1037,33 @@ function zeigeScreen(s, still){
 function anmelden(){
   const h=HAUSWARTE.find(x=>x.pnr===$('#hw-pnr').value.trim());
   if(!h) return fehlerHw('e_pnr');
-  user=h; try{sessionStorage.setItem('hw_pnr',h.pnr)}catch(_){ } zeigeScreen('start');
+  user=h; try{localStorage.setItem('hw_pnr',h.pnr)}catch(_){ } zeigeScreen('start');
 }
 $('#hw-pnr').addEventListener('keydown',e=>{ if(e.key==='Enter') anmelden(); });
 $('#hw-pnr').addEventListener('input',e=>{ e.target.value=e.target.value.replace(/\D/g,''); fehlerHw(''); });
-$('#hw-logout').addEventListener('click',()=>{ user=null; try{sessionStorage.removeItem('hw_pnr')}catch(_){ } $('#hw-pnr').value=''; zeigeScreen('login'); });
+$('#hw-logout').addEventListener('click',()=>{ user=null; try{localStorage.removeItem('hw_pnr'); localStorage.removeItem('hw_entwurf');}catch(_){ } $('#hw-pnr').value=''; zeigeScreen('login'); });
 
 /* Start */
-function neueMeldung(){
-  entwurf=leererEntwurf();
+const SCHRITTE_MIT_ENTWURF=['s1','s2','sWas','sEinsatz','s5','s6'];
+function speichereEntwurf(){ try{ if(user && entwurf.art) localStorage.setItem('hw_entwurf',JSON.stringify({pnr:user.pnr,screen,entwurf,zeit:Date.now()})); }catch(_){ } }
+function ladeEntwurf(){ try{ const d=JSON.parse(localStorage.getItem('hw_entwurf')||'null'); if(d&&user&&d.pnr===user.pnr&&Date.now()-d.zeit<3*864e5) return d; }catch(_){ } return null; }
+function loescheEntwurf(){ try{ localStorage.removeItem('hw_entwurf'); }catch(_){ } }
+function zeigeEntwurfKarte(){ const d=ladeEntwurf(); $('#hw-entwurf').hidden=!d; if(!d) return;
+  const o=d.entwurf.objekt?obj(d.entwurf.objekt):null; $('#hw-entwurf-info').textContent=[nameVon(ARTEN,d.entwurf.art,L),o?o.strasse:''].filter(Boolean).join(' · '); }
+$('#hw-entwurf').addEventListener('click',e=>{ if(e.target.closest('#hw-entwurf-weg')){ loescheEntwurf(); zeigeEntwurfKarte(); return; }
+  const d=ladeEntwurf(); if(!d) return; entwurf=Object.assign(leererEntwurf(d.entwurf.art),d.entwurf);
+  $('#hw-hausnr').value=entwurf.hausnr; $('#hw-mieter').value=entwurf.mieter; $('#hw-andere').value=entwurf.andere; $('#hw-unterart-andere').value=entwurf.unterartAndere; $('#hw-p-auftrag').value=entwurf.pikett.auftraggeber; $('#hw-text').value=entwurf.text;
+  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderFotos(); renderDauer();
+  zeigeScreen(SCHRITTE_MIT_ENTWURF.includes(d.screen)?d.screen:'s1'); });
+function neueMeldung(art, objekt){
+  loescheEntwurf();
+  entwurf=leererEntwurf(art||'verwaltung');
   ['#hw-objekt-suche','#hw-hausnr','#hw-mieter','#hw-andere','#hw-unterart-andere','#hw-p-auftrag','#hw-text'].forEach(s=>{ $(s).value=''; $(s).classList.remove('fehlerhaft'); });
-  fuelleZeitauswahl(); $('#hw-p-datum').value=entwurf.pikett.datum; ['von-h','von-m','bis-h','bis-m'].forEach(k=>$('#hw-p-'+k).value='');
-  renderObjektliste(); renderOrte(); renderBereiche(); renderArten(); renderFotos(); renderDauer();
-  zeigeScreen('s1');
+  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderFotos(); renderDauer();
+  if(objekt){ entwurf.objekt=objekt; renderObjektliste(); zeigeScreen(naechster('s1')); } else zeigeScreen('s1');
 }
-$('#hw-neu').addEventListener('click',neueMeldung);
-$('#hw-ok-neu').addEventListener('click',neueMeldung);
+const naechster = s => ablauf()[ablauf().indexOf(s)+1];
+$('#hw-ok-neu').addEventListener('click',()=>neueMeldung(entwurf.art, entwurf.objekt));
 $('#hw-meine').addEventListener('click',()=>zeigeScreen('meine'));
 $('#hw-ok-start').addEventListener('click',()=>zeigeScreen('start'));
 
@@ -999,13 +1071,15 @@ $('#hw-ok-start').addEventListener('click',()=>zeigeScreen('start'));
 function renderObjektliste(){
   const q=$('#hw-objekt-suche').value.trim().toLowerCase();
   const l=sortiereObjekte(OBJEKTE).filter(o=>!q||[o.nr,o.kunde,o.strasse,o.ort].join(' ').toLowerCase().includes(q));
-  $('#hw-objekte').innerHTML = l.length ? l.map(o=>`<button type="button" class="kachel${entwurf.objekt===o.nr?' gewaehlt':''}" data-o="${esc(o.nr)}"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><span>${esc(o.strasse)}<small>${esc(o.ort)} · ${esc(o.kunde)}</small></span></button>`).join('')
+  let letzterOrt='';
+  $('#hw-objekte').innerHTML = l.length ? l.map(o=>{ const kopf = o.ort!==letzterOrt ? `<div class="ort-kopf">${esc(o.ort)}</div>` : ''; letzterOrt=o.ort;
+      return kopf+`<button type="button" class="kachel${entwurf.objekt===o.nr?' gewaehlt':''}" data-o="${esc(o.nr)}"><svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><span>${esc(o.strasse)}<small>${esc(o.kunde)} · Nr. ${esc(o.nr)}</small></span></button>`; }).join('')
     : `<div class="leer">${esc(t('keine_treffer'))}</div>`;
 }
 $('#hw-objekt-suche').addEventListener('input',renderObjektliste);
 $('#hw-objekte').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return;
   if(entwurf.objekt!==b.dataset.o){ entwurf.hausnr=''; $('#hw-hausnr').value=''; }
-  entwurf.objekt=b.dataset.o; renderObjektliste(); setTimeout(()=>{ zeigeScreen('s2'); setTimeout(()=>$('#hw-hausnr').focus(),60); },160);});
+  entwurf.objekt=b.dataset.o; renderObjektliste(); setTimeout(()=>{ const z=naechster('s1'); zeigeScreen(z); if(z==='s2') setTimeout(()=>$('#hw-hausnr').focus(),60); },160);});
 
 /* 2 Hausnummer, Ort, Mieter */
 $('#hw-hausnr').addEventListener('input',e=>{ entwurf.hausnr=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
@@ -1020,39 +1094,42 @@ $('#hw-mieter').addEventListener('input',e=>{ entwurf.mieter=e.target.value; e.t
 function renderBereiche(){ $('#hw-bereiche').innerHTML=BEREICHE.map(o=>`<button type="button" class="kachel${entwurf.bereich===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); }
 $('#hw-bereiche').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.bereich=b.dataset.v; renderBereiche(); fehlerHw('');});
 
-/* 4 Art der Meldung (+ Pikett) */
-function renderArten(){
-  $('#hw-arten').innerHTML=ARTEN.map(a=>`<button type="button" class="kachel art ${a.tag}${entwurf.art===a.id?' gewaehlt':''}" data-v="${a.id}"><span class="art-icon"><svg viewBox="0 0 24 24">${a.icon}</svg></span><span>${esc(a.n[L]||a.n.de)}<small>${esc(a.d[L]||a.d.de)}</small></span></button>`).join('');
-  $('#hw-pikett').hidden = entwurf.art!=='pikett';
-  const liste=UNTERARTEN[entwurf.art];
-  $('#hw-unterart-box').hidden=!liste;
-  if(liste){
-    $('#hw-unterart-titel').textContent=t(entwurf.art==='intern'?'unterart_titel_intern':'unterart_titel_verwaltung');
-    $('#hw-unterarten').innerHTML=liste.map(u=>`<button type="button" class="kachel${entwurf.unterart===u.id?' gewaehlt':''}" data-v="${u.id}">${esc(u.n[L]||u.n.de)}</button>`).join('');
-  }
-  $('#hw-unterart-andere-box').hidden = !(liste && entwurf.unterart==='andere');
+/* Startseite: Art der Meldung wählen */
+function renderArten(){ renderStartArten(); renderUnterarten(); }
+function renderStartArten(){
+  $('#hw-start-arten').innerHTML=ARTEN.map(a=>`<button type="button" class="kachel art ${a.tag}" data-v="${a.id}"><span class="art-icon"><svg viewBox="0 0 24 24">${a.icon}</svg></span><span>${esc(a.n[L]||a.n.de)}<small>${esc(a.d[L]||a.d.de)}</small></span><svg class="pfeil" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`).join('');
 }
-$('#hw-arten').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return;
-  if(entwurf.art!==b.dataset.v){ entwurf.unterart=null; entwurf.unterartAndere=''; $('#hw-unterart-andere').value=''; }
-  entwurf.art=b.dataset.v; renderArten(); fehlerHw('');
-  const ziel=entwurf.art==='pikett'?'#hw-pikett':'#hw-unterart-box';
-  setTimeout(()=>{ $(ziel).scrollIntoView({behavior:'smooth',block:'center'}); if(entwurf.art==='pikett') $('#hw-p-auftrag').focus(); },80); });
-$('#hw-unterarten').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.unterart=b.dataset.v; renderArten(); fehlerHw('');
+$('#hw-start-arten').addEventListener('click',e=>{const b=e.target.closest('button'); if(b) neueMeldung(b.dataset.v);});
+
+/* Was ist los? / Was für eine Information? (+ Wann bei intern) */
+function renderUnterarten(){
+  const liste=UNTERARTEN[entwurf.art]||[];
+  $('#hw-was-titel').textContent=t(entwurf.art==='intern'?'unterart_titel_intern':'unterart_titel_verwaltung');
+  $('#hw-unterarten').innerHTML=liste.map(u=>`<button type="button" class="kachel${entwurf.unterart===u.id?' gewaehlt':''}" data-v="${u.id}">${esc(u.n[L]||u.n.de)}</button>`).join('');
+  $('#hw-unterart-andere-box').hidden = entwurf.unterart!=='andere';
+  $('#hw-intern-wann').hidden = entwurf.art!=='intern';
+}
+$('#hw-unterarten').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.unterart=b.dataset.v; renderUnterarten(); fehlerHw('');
   if(entwurf.unterart==='andere') setTimeout(()=>{ $('#hw-unterart-andere-box').scrollIntoView({behavior:'smooth',block:'center'}); $('#hw-unterart-andere').focus(); },80);
-  else setTimeout(()=>zeigeScreen('s5'),160); });
+  else if(entwurf.art==='verwaltung') setTimeout(()=>zeigeScreen(naechster('sWas')),160); });
 $('#hw-unterart-andere').addEventListener('input',e=>{ entwurf.unterartAndere=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
 $('#hw-p-auftrag').addEventListener('input',e=>{ entwurf.pikett.auftraggeber=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
 /* Datum und Zeit: eigene Auswahl im 24-Stunden-Format (unabhängig von der Handy-Einstellung) */
 function fuelleZeitauswahl(){
   const wt={de:['So','Mo','Di','Mi','Do','Fr','Sa'],it:['dom','lun','mar','mer','gio','ven','sab'],pt:['dom','seg','ter','qua','qui','sex','sáb'],es:['dom','lun','mar','mié','jue','vie','sáb']}[L];
   const alt=$('#hw-p-datum').value||entwurf.pikett.datum;
-  $('#hw-p-datum').innerHTML=Array.from({length:14},(_,i)=>{ const d=tage(-i), iso=isoTag(d), lbl=i===0?t('heute'):i===1?t('gestern'):wt[d.getDay()];
+  const tageOpt=Array.from({length:14},(_,i)=>{ const d=tage(-i), iso=isoTag(d), lbl=i===0?t('heute'):i===1?t('gestern'):wt[d.getDay()];
     return `<option value="${iso}">${lbl}, ${datum(d)}</option>`; }).join('');
-  $('#hw-p-datum').value=alt;
+  $('#hw-p-datum').innerHTML=tageOpt; $('#hw-p-datum').value=alt;
+  $('#hw-i-datum').innerHTML=tageOpt; $('#hw-i-datum').value=entwurf.intern.datum;
   const opt=(n,schritt)=>'<option value="">--</option>'+Array.from({length:n/schritt},(_,i)=>{const v=String(i*schritt).padStart(2,'0');return `<option value="${v}">${v}</option>`;}).join('');
   ['von','bis'].forEach(f=>{ const [h,m]=(entwurf.pikett[f]||':').split(':');
     $(`#hw-p-${f}-h`).innerHTML=opt(24,1); $(`#hw-p-${f}-m`).innerHTML=opt(60,5); $(`#hw-p-${f}-h`).value=h||''; $(`#hw-p-${f}-m`).value=m||''; });
+  const [ih,im]=(entwurf.intern.zeit||':').split(':');
+  $('#hw-i-h').innerHTML=opt(24,1); $('#hw-i-m').innerHTML=opt(60,5); $('#hw-i-h').value=ih||''; $('#hw-i-m').value=im||'';
 }
+$('#hw-i-datum').addEventListener('change',e=>{ entwurf.intern.datum=e.target.value; fehlerHw(''); });
+['h','m'].forEach(x=>$('#hw-i-'+x).addEventListener('change',()=>{ const h=$('#hw-i-h').value; let m=$('#hw-i-m').value; if(h&&!m){ m='00'; $('#hw-i-m').value=m; } entwurf.intern.zeit=h&&m?`${h}:${m}`:''; fehlerHw(''); }));
 function leseZeit(f){ const h=$(`#hw-p-${f}-h`).value, m=$(`#hw-p-${f}-m`).value;
   if(h&&!m){ $(`#hw-p-${f}-m`).value='00'; return `${h}:00`; }
   return h&&m ? `${h}:${m}` : ''; }
@@ -1061,24 +1138,32 @@ $('#hw-p-datum').addEventListener('change',e=>{ entwurf.pikett.datum=e.target.va
 function renderDauer(){ const m=pikettMinuten(entwurf.pikett); $('#hw-p-dauer').hidden=!m; if(m) $('#hw-p-dauer-wert').textContent=dauerText(m,L); }
 
 /* 5 Beschreibung + Fotos */
-$('#hw-text').addEventListener('input',e=>{ entwurf.text=e.target.value; fehlerHw(''); });
-$('#hw-foto').addEventListener('change',e=>{ [...e.target.files].forEach(f=>{ const r=new FileReader(); r.onload=()=>{ entwurf.fotos.push(r.result); renderFotos(); }; r.readAsDataURL(f); }); e.target.value=''; });
+$('#hw-text').addEventListener('input',e=>{ entwurf.text=e.target.value; fehlerHw(''); speichereEntwurf(); });
+function verkleinereFoto(datei){ return new Promise(ok=>{ const r=new FileReader(); r.onload=()=>{ const img=new Image(); img.onload=()=>{
+  const max=1600, f=Math.min(1,max/Math.max(img.width,img.height)), c=document.createElement('canvas'); c.width=Math.round(img.width*f); c.height=Math.round(img.height*f);
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height); ok(c.toDataURL('image/jpeg',0.75)); }; img.onerror=()=>ok(r.result); img.src=r.result; }; r.readAsDataURL(datei); }); }
+['#hw-foto','#hw-foto-galerie'].forEach(sel=>$(sel).addEventListener('change',async e=>{ const dateien=[...e.target.files]; e.target.value='';
+  for(const d of dateien){ if(entwurf.fotos.length>=6) break; entwurf.fotos.push(await verkleinereFoto(d)); renderFotos(); speichereEntwurf(); } }));
 function renderFotos(){ $('#hw-fotos').innerHTML=entwurf.fotos.map((f,i)=>`<div><img src="${f}" alt="Foto ${i+1}"><button type="button" data-i="${i}" aria-label="Foto entfernen">×</button></div>`).join(''); }
 $('#hw-fotos').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.fotos.splice(+b.dataset.i,1); renderFotos();});
 
 /* 6 Prüfen */
 function renderPruef(){
   const z=(k,v,s)=>`<div><dt>${esc(t(k))}</dt><dd>${v}</dd><button type="button" class="aendern" data-s="${s}">${esc(t('aendern'))}</button></div>`;
-  const o=obj(entwurf.objekt);
-  let h = z('f_objekt',`${esc(o.strasse)}<br><span style="color:var(--cs-text-weich)">${esc(t('hausnr'))} ${esc(entwurf.hausnr.trim())} · ${esc(o.ort)}</span>`,'s1')
-    + z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2')
-    + z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2')
-    + z('f_art',esc(nameVon(ARTEN,entwurf.art,L))+(entwurf.unterart?`<br><b>${esc(unterartText({art:entwurf.art,unterart:entwurf.unterart,unterartAndere:entwurf.unterartAndere.trim()},L))}</b>`:''),'s4');
-  if(entwurf.art==='pikett'){ const p=entwurf.pikett; h+=z('f_auftrag',esc(p.auftraggeber.trim()),'s4')+z('f_einsatz',`${datumIso(p.datum)}, ${esc(p.von)}–${esc(p.bis)}<br><b>${esc(dauerText(pikettMinuten(p),L))}</b>`,'s4'); }
-  h += z('f_text',esc(entwurf.text.trim()),'s5') + z('f_fotos',entwurf.fotos.length,'s5');
+  const o=obj(entwurf.objekt), a=entwurf.art;
+  const ua=entwurf.unterart?esc(unterartText({art:a,unterart:entwurf.unterart,unterartAndere:entwurf.unterartAndere.trim()},L)):'';
+  let h = z('f_art',`<b>${esc(nameVon(ARTEN,a,L))}</b>`,'start')
+    + z('f_objekt',`${esc(o.strasse)}<br><span style="color:var(--cs-text-weich)">${a!=='intern'?esc(t('hausnr'))+' '+esc(entwurf.hausnr.trim())+' · ':''}${esc(o.ort)}</span>`,'s1');
+  if(a!=='intern') h += z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2') + z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2');
+  if(a==='verwaltung') h += z('f_was',ua,'sWas');
+  if(a==='intern') h += z('f_was',ua,'sWas') + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sWas');
+  if(a==='pikett'){ const p=entwurf.pikett; h+=z('f_auftrag',esc(p.auftraggeber.trim()),'sEinsatz')+z('f_einsatz',`${datumIso(p.datum)}, ${esc(p.von)}–${esc(p.bis)}<br><b>${esc(dauerText(pikettMinuten(p),L))}</b>`,'sEinsatz'); }
+  h += z(a==='intern'?'f_bemerkung':'f_text',esc(entwurf.text.trim())||'—','s5') + z('f_fotos',entwurf.fotos.length,'s5');
   $('#hw-pruef').innerHTML=h;
 }
-$('#hw-pruef').addEventListener('click',e=>{const b=e.target.closest('.aendern'); if(b) zeigeScreen(b.dataset.s);});
+$('#hw-pruef').addEventListener('click',e=>{const b=e.target.closest('.aendern'); if(!b) return;
+  if(b.dataset.s==='start'){ if(confirm(t('art_wechseln'))) zeigeScreen('start'); return; }
+  zeigeScreen(b.dataset.s);});
 
 function pruefeSchritt(s){
   if(s==='s1'&&!entwurf.objekt) return 'e_objekt';
@@ -1089,46 +1174,89 @@ function pruefeSchritt(s){
     if(entwurf.ort==='mieter'&&!entwurf.mieter.trim()){ $('#hw-mieter').classList.add('fehlerhaft'); $('#hw-mieter').focus(); return 'e_mieter'; }
     if(entwurf.ort==='andere'&&!entwurf.andere.trim()){ $('#hw-andere').classList.add('fehlerhaft'); $('#hw-andere').focus(); return 'e_andere'; }
   }
-  if(s==='s4'){
-    if(!entwurf.art) return 'e_art';
+  if(s==='sWas'){
     if(UNTERARTEN[entwurf.art]){
       if(!entwurf.unterart) return entwurf.art==='intern'?'e_unterart_intern':'e_unterart_verwaltung';
       if(entwurf.unterart==='andere'&&!entwurf.unterartAndere.trim()){ $('#hw-unterart-andere').classList.add('fehlerhaft'); $('#hw-unterart-andere').focus(); return 'e_unterart_andere'; }
     }
+    if(entwurf.art==='intern'&&(!entwurf.intern.datum||!entwurf.intern.zeit)) return 'e_zeit';
+  }
+  if(s==='sEinsatz'){
     if(entwurf.art==='pikett'){ const p=entwurf.pikett;
       if(!p.auftraggeber.trim()){ $('#hw-p-auftrag').classList.add('fehlerhaft'); $('#hw-p-auftrag').focus(); return 'e_auftrag'; }
       if(!p.datum||!p.von||!p.bis) return 'e_pikett';
       if(p.datum>isoTag(heute)) return 'e_pikett_zukunft';
       if(pikettMinuten(p)===0) return 'e_pikett_gleich'; }
   }
-  if(s==='s5'&&entwurf.text.trim().length<3) return 'e_text';
+  if(s==='s5'&&entwurf.art!=='intern'&&entwurf.text.trim().length<3) return 'e_text';
   return '';
 }
 function senden(){
   const nr=Math.max(1000,...MELDUNGEN.map(m=>m.nr))+1;
-  MELDUNGEN.push({nr, objekt:entwurf.objekt, hausnr:entwurf.hausnr.trim(), ort:entwurf.ort, mieter:entwurf.ort==='mieter'?entwurf.mieter.trim():'', andere:entwurf.ort==='andere'?entwurf.andere.trim():'',
-    bereich:entwurf.bereich, art:entwurf.art, unterart:UNTERARTEN[entwurf.art]?entwurf.unterart:'', unterartAndere:entwurf.unterart==='andere'?entwurf.unterartAndere.trim():'', pikett:entwurf.art==='pikett'?{...entwurf.pikett,auftraggeber:entwurf.pikett.auftraggeber.trim()}:null, text:entwurf.text.trim(),
+  const intern=entwurf.art==='intern';
+  MELDUNGEN.push({nr, objekt:entwurf.objekt, hausnr:intern?'':entwurf.hausnr.trim(), ort:intern?null:entwurf.ort, mieter:!intern&&entwurf.ort==='mieter'?entwurf.mieter.trim():'', andere:!intern&&entwurf.ort==='andere'?entwurf.andere.trim():'',
+    bereich:intern?null:entwurf.bereich, intern:intern?{...entwurf.intern}:null, art:entwurf.art, unterart:UNTERARTEN[entwurf.art]?entwurf.unterart:'', unterartAndere:entwurf.unterart==='andere'?entwurf.unterartAndere.trim():'', pikett:entwurf.art==='pikett'?{...entwurf.pikett,auftraggeber:entwurf.pikett.auftraggeber.trim()}:null, text:entwurf.text.trim(),
     status:'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
-  $('#hw-ok-nr').textContent=t('ok_nr',nr); renderAdmin(); zeigeScreen('ok');
-  uebersetzeMeldung(MELDUNGEN.find(m=>m.nr===nr));
+  loescheEntwurf(); $('#hw-ok-nr').textContent=t('ok_nr',nr); renderAdmin(); zeigeScreen('ok');
+  const neu=MELDUNGEN.find(m=>m.nr===nr); uebersetzeMeldung(neu).then(()=>sendeMail(neu));
 }
 
 /* Automatische Übersetzung ins Deutsche (für Verwaltung und Rapport) */
 async function uebersetzeMeldung(m){
   if(!m) return;
   const felder=[['text','textDe'],['unterartAndere','unterartAndereDe'],['andere','andereDe']].filter(([k])=>m[k]);
+  if(!felder.length){ m.textDe=''; m.sprache='DE'; m.uebersetzung='nicht_noetig'; renderAdminFalls(); return; }
   m.uebersetzung='laeuft'; renderAdminFalls();
   try{
-    const r=await fetch(UEBERSETZUNG_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte:felder.map(([k])=>m[k])})});
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const j=await r.json();
+    const texte=felder.map(([k])=>m[k]);
+    let j;
+    try{
+      const r=await fetch(UEBERSETZUNG_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texte})});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      j=await r.json();
+    }catch(serverFehler){ j=await uebersetzeMitClaude(texte); }   /* Vorschau ohne Server: Claude übersetzt */
     m.sprache=(j.sprache||'').toUpperCase().slice(0,2)||'?';
     felder.forEach(([k,kd],i)=>{ m[kd]= m.sprache==='DE' ? m[k] : String((j.texte_de||[])[i]||'').replace(/ß/g,'ss'); });
     m.uebersetzung = m.sprache==='DE' ? 'nicht_noetig' : (m.textDe?'ok':'ausstehend');
   }catch(err){ m.uebersetzung='ausstehend'; m.fehler=String(err.message||err); }
   renderAdminFalls();
 }
+async function uebersetzeMitClaude(texte){
+  const sample = window.claude && window.claude.use ? await window.claude.use('sample') : null;
+  if(!sample) throw new Error('Keine Übersetzung verfügbar');
+  const j = await sample.json(
+    'Du übersetzt Meldungen von Hauswarten einer Schweizer Reinigungsfirma für die Liegenschaftsverwaltung ins Deutsche. '
+    + 'Übersetze jeden Text der folgenden JSON-Liste sinngemäss, sachlich und korrekt ins Deutsche (Schweizer Schreibweise: ss statt ß). '
+    + 'Ist ein Text bereits deutsch, übernimm ihn unverändert. Erkenne die Sprache des ersten Textes als zweistelligen Code (DE, IT, PT, ES, FR, EN …). '
+    + 'Antworte nur mit JSON in dieser Form: {"sprache":"IT","texte_de":["…"]} – gleiche Anzahl und Reihenfolge wie die Eingabe.\n\n'
+    + JSON.stringify(texte), {modelTier:'quick'});
+  if(!j || !Array.isArray(j.texte_de)) throw new Error('Unerwartete Antwort');
+  return j;
+}
 function renderAdminFalls(){ if(!$('#admin').hidden) renderAdmin(); if($('#modal').classList.contains('offen')&&aktNr) oeffne(aktNr); }
+/* E-Mail an die Hauswartung (jede Meldung) */
+const MAIL_API = '/api/meldung-senden';
+const MAIL_EMPFAENGER = 'hauswartung@clean-service.ch';
+async function sendeMail(m){
+  if(!m) return; m.mail='laeuft'; renderAdminFalls();
+  const o=obj(m.objekt), e=m.pikett?pikettMinuten(m.pikett):0;
+  const daten={nr:m.nr, art:art(m.art).n.de, artId:m.art, unterart:unterartText(m),
+    objekt:{nr:m.objekt,strasse:o.strasse,ort:o.ort,kunde:o.kunde,email:o.email||''}, hausnr:m.hausnr,
+    stockwerk:m.bereich?nameVon(BEREICHE,m.bereich):'', bereich:m.ort?ortText(m):'', zeitpunkt:m.intern?`${datumIso(m.intern.datum)}, ${m.intern.zeit} Uhr`:'',
+    pikett:m.pikett?{auftraggeber:m.pikett.auftraggeber,datum:datumIso(m.pikett.datum),von:m.pikett.von,bis:m.pikett.bis,dauer:hhmm(e+ADMIN_MIN_PIKETT)+' h ('+dezStd(e+ADMIN_MIN_PIKETT)+' Std.)'}:null,
+    textDe:textFuerVerwaltung(m), textOriginal:m.text, sprache:m.sprache||'', uebersetzt:!['nicht_noetig'].includes(m.uebersetzung),
+    hauswart:m.hwName, pnr:m.pnr, gemeldet:m.gemeldet.toLocaleString('de-CH',{dateStyle:'short',timeStyle:'short'}), fotos:m.fotos.slice(0,6)};
+  try{ const r=await fetch(MAIL_API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(daten)});
+    if(!r.ok) throw new Error('HTTP '+r.status); m.mail='gesendet'; m.mailZeit=new Date(); }
+  catch(err){ m.mail='fehler'; }
+  renderAdminFalls();
+}
+function mailHtml(m){
+  if(m.mail==='gesendet') return `<span class="tag positiv">Gesendet ${m.mailZeit?m.mailZeit.toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}):''}</span>`;
+  if(m.mail==='laeuft') return `<span class="tag">Wird gesendet …</span>`;
+  if(m.mail==='fehler') return `<span class="tag negativ">Nicht gesendet</span> <button type="button" class="btn secondary" id="modal-mail-neu" style="min-height:30px;margin-left:6px">Erneut senden</button>`;
+  return `<span class="mail-leer">—</span> <button type="button" class="btn secondary" id="modal-mail-neu" style="min-height:30px;margin-left:6px">Jetzt senden</button>`;
+}
 const textFuerVerwaltung = m => (m.uebersetzung==='ok'||m.uebersetzung==='manuell'||m.uebersetzung==='nicht_noetig') ? (m.textDe||m.text) : m.text;
 const brauchtUebersetzung = m => m.uebersetzung==='ausstehend'||m.uebersetzung==='laeuft';
 function uebersetzungTag(m){
@@ -1142,9 +1270,9 @@ $('#hw-weiter').addEventListener('click',()=>{
   if(screen==='login') return anmelden();
   const f=pruefeSchritt(screen); if(f) return fehlerHw(f);
   if(screen==='s6') return senden();
-  zeigeScreen(REIHE[REIHE.indexOf(screen)+1]);
+  zeigeScreen(naechster(screen));
 });
-$('#hw-zurueck').addEventListener('click',()=>{ if(screen==='meine') return zeigeScreen('start'); zeigeScreen(REIHE[Math.max(0,REIHE.indexOf(screen)-1)]); });
+$('#hw-zurueck').addEventListener('click',()=>{ const fl=ablauf(), i=fl.indexOf(screen); zeigeScreen(i>0?fl[i-1]:'start'); });
 
 function renderMeine(){
   const l=MELDUNGEN.filter(m=>m.pnr===user.pnr).sort((a,b)=>b.nr-a.nr);
@@ -1164,6 +1292,7 @@ $('#admin-login-form').addEventListener('submit',e=>{ e.preventDefault();
 $('#admin-logout').addEventListener('click',()=>{ adminOk=false; try{sessionStorage.removeItem('hw_admin')}catch(_){ } location.hash='#admin'; route(); });
 $$('.menu-toggle').forEach(b=>b.addEventListener('click',()=>$('#sidebar').classList.toggle('offen')));
 $$('[data-schliessen]').forEach(b=>b.addEventListener('click',()=>b.closest('.modal-overlay').classList.remove('offen')));
+document.addEventListener('change',e=>{ if(e.target.closest&&e.target.closest('#hw')) speichereEntwurf(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ $$('.modal-overlay.offen').forEach(m=>m.classList.remove('offen')); schliesseRapport(); } });
 $('#einst-admin').textContent = MIT_ADMIN ? `Einsatzdauer + ${ADMIN_MIN_PIKETT} Min. Adminaufwand pro Einsatz` : 'Verrechnet wird die reine Einsatzdauer. Der Adminaufwand ist vorbereitet, aber noch nicht aktiv.';
 const hinweisTimer={};
@@ -1205,9 +1334,9 @@ function renderMeldungen(){
   const l=gefiltert(); $('#leer-meldungen').hidden=l.length>0;
   $('#tb-meldungen').innerHTML=l.map(m=>`<tr class="${m.status==='neu'?'hinweis':''} klickbar" onclick="oeffne(${m.nr})">
     <td class="nr">#${m.nr}</td>
-    <td class="objekt-zeile"><strong>${esc(obj(m.objekt).strasse)}</strong><span>Hausnr. ${esc(m.hausnr)} · ${esc(obj(m.objekt).ort)} · ${esc(obj(m.objekt).kunde)}</span></td>
+    <td class="objekt-zeile"><strong>${esc(obj(m.objekt).strasse)}</strong><span>${m.hausnr?'Hausnr. '+esc(m.hausnr)+' · ':''}${esc(obj(m.objekt).ort)} · ${esc(obj(m.objekt).kunde)}</span></td>
     <td>${artTag(m.art)} ${uebersetzungTag(m)}${m.unterart?`<br><span class="nr" style="font-size:11.5px">${esc(unterartText(m))}</span>`:''}</td>
-    <td class="mobil-weg objekt-zeile"><strong style="font-weight:normal">${esc(nameVon(BEREICHE,m.bereich))}</strong><span>${esc(ortText(m))}</span></td>
+    <td class="mobil-weg objekt-zeile">${m.bereich?`<strong style="font-weight:normal">${esc(nameVon(BEREICHE,m.bereich))}</strong><span>${esc(ortText(m))}</span>`:(m.intern?`<span>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</span>`:'—')}</td>
     <td class="mobil-weg">${datum(m.gemeldet)}</td><td class="mobil-weg">${esc(m.hwName)}</td><td>${statusTag(m.status)}</td></tr>`).join('');
 }
 $('#btn-csv').addEventListener('click',()=>csvLaden('hauswartung-meldungen.csv',
@@ -1228,10 +1357,10 @@ function oeffne(nr){
   $('#modal-body').innerHTML=`
     <div class="detail-kopf">${statusTag(m.status)} ${artTag(m.art)}</div>
     <dl class="zusammenfassung">
-      <dt>Objekt</dt><dd>${esc(o.strasse)} · Hausnr. ${esc(m.hausnr)}<br>${esc(o.ort)} <span class="nr">(Obj. ${esc(m.objekt)})</span></dd>
+      <dt>Objekt</dt><dd>${esc(o.strasse)}${m.hausnr?' · Hausnr. '+esc(m.hausnr):''}<br>${esc(o.ort)} <span class="nr">(Obj. ${esc(m.objekt)})</span></dd>
       <dt>Kunde</dt><dd>${esc(o.kunde||'—')}${o.email?`<br><a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`:(m.art!=='intern'?'<br><span class="mail-leer">Keine Kunden-E-Mail hinterlegt</span>':'')}</dd>
-      <dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd>
-      <dt>Bereich</dt><dd>${esc(ortText(m))}</dd>
+      ${m.bereich?`<dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd><dt>Bereich</dt><dd>${esc(ortText(m))}</dd>`:''}
+      ${m.intern?`<dt>Zeitpunkt</dt><dd>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</dd>`:''}
       <dt>Art</dt><dd>${esc(artVoll(m))}</dd>
       ${m.pikett?`<dt>Auftrag von</dt><dd>${esc(m.pikett.auftraggeber||'—')}</dd><dt>Pikett</dt><dd>${datumIso(m.pikett.datum)}</dd>`:''}
       <dt>Beschreibung</dt><dd>${m.uebersetzung==='nicht_noetig'?esc(m.text):`
@@ -1244,6 +1373,7 @@ function oeffne(nr){
           ${m.uebersetzung==='ausstehend'?`<div class="hinweisbox warnung" style="margin:8px 0 0">Die automatische Übersetzung war nicht erreichbar. Bitte deutschen Text von Hand eintragen oder erneut übersetzen.</div>`:''}
         </div>`}</dd>
       <dt>Gemeldet</dt><dd>${datum(m.gemeldet)} · ${esc(m.hwName)} (${esc(m.pnr)})</dd>
+      <dt>E-Mail</dt><dd><span class="nr">${esc(MAIL_EMPFAENGER)}</span><br>${mailHtml(m)}</dd>
     </dl>
     ${m.pikett?aufwandHtml(m):''}
     ${m.fotos.length?`<div class="detail-fotos">${m.fotos.map(f=>`<img src="${f}" alt="Foto">`).join('')}</div>`:''}`;
@@ -1251,6 +1381,7 @@ function oeffne(nr){
   $('#modal-rapport').hidden = m.art==='intern';
   const bNeu=$('#modal-neu-uebersetzen'), bSp=$('#modal-textde-speichern');
   if(bNeu) bNeu.onclick=()=>uebersetzeMeldung(m);
+  const bMail=$('#modal-mail-neu'); if(bMail) bMail.onclick=()=>sendeMail(m);
   if(bSp) bSp.onclick=()=>{ const v=$('#modal-textde').value.trim(); if(!v) return; m.textDe=v.replace(/ß/g,'ss'); m.uebersetzung='manuell'; if(!m.sprache||m.sprache==='?') m.sprache='?'; renderAdmin(); oeffne(m.nr); };
   $('#modal').classList.add('offen');
 }
@@ -1413,10 +1544,17 @@ function route(){
   if(istAdmin&&!adminOk) setTimeout(()=>$('#admin-code').focus(),50);
 }
 window.addEventListener('hashchange',route);
+window.addEventListener('popstate',e=>{
+  if(location.hash.startsWith('#admin')) return;
+  if(!user){ ausVerlauf=true; zeigeScreen('login'); ausVerlauf=false; return; }
+  const ziel = e.state&&e.state.hw ? e.state.hw : 'start';
+  ausVerlauf=true; zeigeScreen(ziel==='login'||ziel==='ok'?'start':ziel); ausVerlauf=false;
+});
 
 try{ const l=localStorage.getItem('hw_lang'); if(l&&T[l]) L=l; }catch(_){}
-try{ const p=sessionStorage.getItem('hw_pnr'), h=HAUSWARTE.find(x=>x.pnr===p); if(h){ user=h; screen='start'; } }catch(_){}
-uebersetze(); zeigeScreen(screen); route();
+try{ const p=localStorage.getItem('hw_pnr'), h=HAUSWARTE.find(x=>x.pnr===p); if(h){ user=h; screen='start'; } }catch(_){}
+try{ history.replaceState({hw:screen},''); }catch(_){ }
+uebersetze(); ausVerlauf=true; zeigeScreen(screen); ausVerlauf=false; route();
 </script>
 </body>
 </html>

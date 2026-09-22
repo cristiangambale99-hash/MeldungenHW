@@ -1,0 +1,8 @@
+{
+  "name": "hauswartung-clean-service",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "nodemailer": "^10.0.10"
+  }
+}
