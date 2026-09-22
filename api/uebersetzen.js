@@ -4,7 +4,8 @@
 // damit IMMER übersetzt wird. Für den Dauerbetrieb wird DeepL empfohlen (Qualität, Datenschutz).
 // Test im Browser: /api/uebersetzen?test=Buongiorno
 
-const schweiz = s => String(s || '').replace(/ß/g, 'ss');
+import { fachbegriffe } from '../lib/glossar.js';
+const schweiz = s => fachbegriffe(s);
 
 async function deepl(texte, key) {
   const base = key.endsWith(':fx') ? 'https://api-free.deepl.com' : 'https://api.deepl.com';
