@@ -424,8 +424,6 @@ img.brand-logo{width:100%;max-width:168px}
       <div class="objekt-gewaehlt" id="hw-objekt-info"></div>
       <div class="feld-titel" data-t="hausnr"></div>
       <input class="gross-input" id="hw-hausnr" autocomplete="off" maxlength="12">
-      <div class="feld-titel" data-t="stockwerk_titel"></div>
-      <div class="kacheln drei" id="hw-bereiche"></div>
       <div class="feld-titel" data-t="ort_titel"></div>
       <div class="kacheln zwei" id="hw-orte"></div>
       <div class="aufklappen" id="hw-mieter-box" hidden>
@@ -436,6 +434,10 @@ img.brand-logo{width:100%;max-width:168px}
         <div class="feld-titel" data-t="andere_titel"></div>
         <input class="gross-input" id="hw-andere" autocomplete="off" maxlength="80">
         <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
+      </div>
+      <div class="aufklappen" id="hw-stockwerk-box" hidden>
+        <div class="feld-titel" data-t="stockwerk_titel"></div>
+        <div class="kacheln drei" id="hw-bereiche"></div>
       </div>
     </section>
 
@@ -597,7 +599,7 @@ img.brand-logo{width:100%;max-width:168px}
         </div>
         <div class="table-wrap">
           <table class="table">
-            <thead><tr><th>Nr.</th><th>Objekt</th><th>Art</th><th class="mobil-weg">Stockwerk / Bereich</th><th class="mobil-weg">Gemeldet</th><th class="mobil-weg">Von</th><th>Status</th></tr></thead>
+            <thead><tr><th>Nr.</th><th>Objekt</th><th>Art</th><th class="mobil-weg">Bereich / Stockwerk</th><th class="mobil-weg">Gemeldet</th><th class="mobil-weg">Von</th><th>Status</th></tr></thead>
             <tbody id="tb-meldungen"></tbody>
           </table>
         </div>
@@ -801,6 +803,9 @@ let OBJEKTE = [
   {"nr": "1846", "kunde": "Privera AG", "strasse": "Hagenbuchstrasse 21/23/25/29/31/33", "ort": "8192 Zweidlen", "email": ""}
 ];
 
+/* Bereiche, bei denen das Stockwerk angegeben werden muss */
+const MIT_STOCKWERK = ['mieter','treppenhaus'];
+const brauchtStockwerk = e => MIT_STOCKWERK.includes(e.ort);
 /* Ort im Objekt – aus Beekeeper-Formular */
 const ORTE = [
   {id:'mieter',     n:{de:'Mieter',it:'Inquilino',pt:'Inquilino',es:'Inquilino'}},
@@ -1142,12 +1147,16 @@ $('#hw-objekte').addEventListener('click',e=>{const b=e.target.closest('button')
 
 /* 2 Hausnummer, Ort, Mieter */
 $('#hw-hausnr').addEventListener('input',e=>{ entwurf.hausnr=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
-function renderOrte(){ $('#hw-orte').innerHTML=ORTE.map(o=>`<button type="button" class="kachel${entwurf.ort===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); $('#hw-mieter-box').hidden = entwurf.ort!=='mieter'; $('#hw-andere-box').hidden = entwurf.ort!=='andere'; }
+function renderOrte(){ $('#hw-orte').innerHTML=ORTE.map(o=>`<button type="button" class="kachel${entwurf.ort===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); $('#hw-mieter-box').hidden = entwurf.ort!=='mieter'; $('#hw-andere-box').hidden = entwurf.ort!=='andere';
+  const mit=brauchtStockwerk(entwurf); $('#hw-stockwerk-box').hidden = !mit;
+  if(!mit && entwurf.bereich){ entwurf.bereich=null; renderBereiche(); } }
 $('#hw-orte').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.ort=b.dataset.v; renderOrte(); fehlerHw('');
   const box={mieter:'mieter',andere:'andere'}[entwurf.ort];
-  if(box) setTimeout(()=>{ $(`#hw-${box}-box`).scrollIntoView({behavior:'smooth',block:'center'}); $(`#hw-${box}`).focus(); },80); });
+  if(box) setTimeout(()=>{ $(`#hw-${box}-box`).scrollIntoView({behavior:'smooth',block:'center'}); $(`#hw-${box}`).focus(); },80);
+  else if(brauchtStockwerk(entwurf)) setTimeout(()=>$('#hw-stockwerk-box').scrollIntoView({behavior:'smooth',block:'center'}),80); });
 $('#hw-andere').addEventListener('input',e=>{ entwurf.andere=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
 $('#hw-mieter').addEventListener('input',e=>{ entwurf.mieter=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
+$('#hw-mieter').addEventListener('blur',()=>{ if(brauchtStockwerk(entwurf)&&!entwurf.bereich&&entwurf.mieter.trim()) $('#hw-stockwerk-box').scrollIntoView({behavior:'smooth',block:'center'}); });
 
 /* 3 Bereich */
 function renderBereiche(){ $('#hw-bereiche').innerHTML=BEREICHE.map(o=>`<button type="button" class="kachel${entwurf.bereich===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); }
@@ -1213,7 +1222,8 @@ function renderPruef(){
   const ua=entwurf.unterart?esc(unterartText({art:a,unterart:entwurf.unterart,unterartAndere:entwurf.unterartAndere.trim()},L)):'';
   let h = z('f_art',`<b>${esc(nameVon(ARTEN,a,L))}</b>`,'start')
     + z('f_objekt',`${esc(o.strasse)}<br><span style="color:var(--cs-text-weich)">${a!=='intern'?esc(t('hausnr'))+' '+esc(entwurf.hausnr.trim())+' · ':''}${esc(o.ort)}</span>`,'s1');
-  if(a!=='intern') h += z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2') + z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2');
+  if(a!=='intern'){ h += z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2');
+    if(entwurf.bereich) h += z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2'); }
   if(a==='verwaltung') h += z('f_was',ua,'sWas');
   if(a==='intern') h += z('f_was',ua,'sWas') + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sWas');
   if(a==='pikett'){ const p=entwurf.pikett; h+=z('f_auftrag',esc(p.auftraggeber.trim()),'sEinsatz')+z('f_einsatz',`${datumIso(p.datum)}, ${esc(p.von)}–${esc(p.bis)}<br><b>${esc(dauerText(pikettMinuten(p),L))}</b>`,'sEinsatz'); }
@@ -1228,10 +1238,11 @@ function pruefeSchritt(s){
   if(s==='s1'&&!entwurf.objekt) return 'e_objekt';
   if(s==='s2'){
     if(!entwurf.hausnr.trim()){ $('#hw-hausnr').classList.add('fehlerhaft'); $('#hw-hausnr').focus(); return 'e_hausnr'; }
-    if(!entwurf.bereich) return 'e_bereich';
     if(!entwurf.ort) return 'e_ort';
     if(entwurf.ort==='mieter'&&!entwurf.mieter.trim()){ $('#hw-mieter').classList.add('fehlerhaft'); $('#hw-mieter').focus(); return 'e_mieter'; }
     if(entwurf.ort==='andere'&&!entwurf.andere.trim()){ $('#hw-andere').classList.add('fehlerhaft'); $('#hw-andere').focus(); return 'e_andere'; }
+    if(brauchtStockwerk(entwurf)&&!entwurf.bereich){ $('#hw-stockwerk-box').scrollIntoView({behavior:'smooth',block:'center'}); return 'e_bereich'; }
+    if(!brauchtStockwerk(entwurf)) entwurf.bereich=null;
   }
   if(s==='sWas'){
     if(UNTERARTEN[entwurf.art]){
@@ -1551,7 +1562,7 @@ function renderMeldungen(){
     <td class="nr">#${m.nr}</td>
     <td class="objekt-zeile"><strong>${esc(obj(m.objekt).strasse)}</strong><span>${m.hausnr?'Hausnr. '+esc(m.hausnr)+' · ':''}${esc(obj(m.objekt).ort)} · ${esc(obj(m.objekt).kunde)}</span></td>
     <td>${artTag(m.art)} ${uebersetzungTag(m)}${m.unterart?`<br><span class="nr" style="font-size:11.5px">${esc(unterartText(m))}</span>`:''}</td>
-    <td class="mobil-weg objekt-zeile">${m.bereich?`<strong style="font-weight:normal">${esc(nameVon(BEREICHE,m.bereich))}</strong><span>${esc(ortText(m))}</span>`:(m.intern?`<span>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</span>`:'—')}</td>
+    <td class="mobil-weg objekt-zeile">${m.ort?`<strong style="font-weight:normal">${esc(ortText(m))}</strong><span>${m.bereich?esc(nameVon(BEREICHE,m.bereich)):''}</span>`:(m.intern?`<span>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</span>`:'—')}</td>
     <td class="mobil-weg">${datum(m.gemeldet)}</td><td class="mobil-weg">${esc(m.hwName)}</td><td>${statusTag(m.status)}</td></tr>`).join('');
 }
 $('#btn-csv').addEventListener('click',()=>csvLaden('hauswartung-meldungen.csv',
@@ -1576,7 +1587,7 @@ function oeffne(nr){
     <dl class="zusammenfassung">
       <dt>Objekt</dt><dd>${esc(o.strasse)}${m.hausnr?' · Hausnr. '+esc(m.hausnr):''}<br>${esc(o.ort)} <span class="nr">(Obj. ${esc(m.objekt)})</span></dd>
       <dt>Kunde</dt><dd>${esc(o.kunde||'—')}${o.email?`<br><a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`:(m.art!=='intern'?'<br><span class="mail-leer">Keine Kunden-E-Mail hinterlegt</span>':'')}</dd>
-      ${m.bereich?`<dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd><dt>Bereich</dt><dd>${esc(ortText(m))}</dd>`:''}
+      ${m.ort?`<dt>Bereich</dt><dd>${esc(ortText(m))}</dd>`:''}${m.bereich?`<dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd>`:''}
       ${m.intern?`<dt>Zeitpunkt</dt><dd>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</dd>`:''}
       <dt>Art</dt><dd>${esc(artVoll(m))}</dd>
       ${m.pikett?`<dt>Auftrag von</dt><dd>${esc(m.pikett.auftraggeber||'—')}</dd><dt>Pikett</dt><dd>${datumIso(m.pikett.datum)}</dd>`:''}
@@ -1629,8 +1640,8 @@ async function zeigeRapport(nr){
       <p>${pk?'Gerne informieren wir Sie über den folgenden Pikett-Einsatz in Ihrer Liegenschaft.':'Gerne informieren wir Sie über die folgende Feststellung unserer Hauswartung in Ihrer Liegenschaft.'}</p>
       <table>
         <tr><th>Objekt</th><td>${esc(o.strasse)}, Hausnummer ${esc(m.hausnr)}, ${esc(o.ort)} <span style="color:#555">(Obj. ${esc(m.objekt)})</span></td></tr>
-        <tr><th>Stockwerk</th><td>${esc(nameVon(BEREICHE,m.bereich))}</td></tr>
         <tr><th>Bereich</th><td>${esc(ortText(m))}</td></tr>
+        ${m.bereich?`<tr><th>Stockwerk</th><td>${esc(nameVon(BEREICHE,m.bereich))}</td></tr>`:''}
         ${m.unterart?`<tr><th>Art der Meldung</th><td>${esc(unterartText(m))}</td></tr>`:''}
         ${pk?`<tr><th>Auftrag erteilt von</th><td>${esc(m.pikett.auftraggeber||'—')}</td></tr>`:''}
         <tr><th>${pk?'Einsatz am':'Festgestellt am'}</th><td>${pk?datumIso(m.pikett.datum):datum(m.gemeldet)}</td></tr>
