@@ -668,10 +668,10 @@ img.brand-logo{width:100%;max-width:168px}
       <section class="card">
         <div class="toolbar">
           <input type="search" id="objekt-suche" placeholder="Suchen nach Objektnummer, Kunde, Strasse, Ort" aria-label="Objekte suchen">
-          <select id="objekt-filter-mail" aria-label="E-Mail-Filter"><option value="">Alle Objekte</option><option value="mit">Mit Kunden-E-Mail</option><option value="ohne">Ohne Kunden-E-Mail</option></select>
+          <select id="objekt-filter-mail" aria-label="E-Mail-Filter"><option value="">Alle Objekte</option><option value="mit">Mit Verwaltungs-E-Mail</option><option value="ohne">Ohne Verwaltungs-E-Mail</option></select>
         </div>
         <div class="table-wrap"><table class="table">
-          <thead><tr><th>Nr.</th><th>Objekt</th><th class="mobil-weg">Kunde</th><th class="mobil-weg">Kunden-E-Mail</th><th class="zahl">Offen</th><th class="zahl">Aktionen</th></tr></thead>
+          <thead><tr><th>Nr.</th><th>Objekt</th><th class="mobil-weg">Kunde</th><th class="mobil-weg">E-Mail Verwaltung</th><th class="zahl">Offen</th><th class="zahl">Aktionen</th></tr></thead>
           <tbody id="tb-objekte"></tbody></table></div>
         <div class="leer" id="leer-objekte" hidden>Kein Objekt gefunden.</div>
       </section>
@@ -695,7 +695,7 @@ img.brand-logo{width:100%;max-width:168px}
       <div class="grid grid-3">
         <div class="platzhalter-karte"><strong>Pikett-Verrechnung</strong><br><span id="einst-admin"></span></div>
         <div class="platzhalter-karte"><strong>Auswahllisten</strong><br>Stockwerk, Bereich und Art der Meldung gemäss bisherigem Beekeeper-Formular</div>
-        <div class="platzhalter-karte"><strong>Versand an Verwaltung</strong><br>Rapport-PDF automatisch per E-Mail an die Kunden-E-Mail des Objekts (Ausbaustufe)</div>
+        <div class="platzhalter-karte"><strong>Versand an Verwaltung</strong><br>Rapport-PDF automatisch an alle beim Objekt hinterlegten Verwaltungs-Adressen</div>
       </div>
     </section>
   </main>
@@ -713,7 +713,7 @@ img.brand-logo{width:100%;max-width:168px}
         </div>
         <div class="feld"><label for="mo-strasse">Strasse *</label><input id="mo-strasse" placeholder="Industriestrasse 5" autocomplete="off"><span class="hilfe">Wird den Hauswarten als Objektname angezeigt</span></div>
         <div class="feld"><label for="mo-kunde">Kunde / Verwaltung *</label><input id="mo-kunde" autocomplete="off"></div>
-        <div class="feld"><label for="mo-email">Kunden-E-Mail</label><input id="mo-email" type="email" placeholder="verwaltung@beispiel.ch" autocomplete="off"><span class="hilfe">Ist eine Adresse hinterlegt, gehen «Meldung (Verwaltung)» und «Pikettdienst» samt PDF direkt an die Verwaltung.</span></div>
+        <div class="feld"><label for="mo-email">E-Mail Verwaltung</label><textarea id="mo-email" rows="3" placeholder="verwaltung@beispiel.ch, zweite.person@beispiel.ch" autocomplete="off" style="font-family:var(--cs-font);font-size:13px"></textarea><span class="hilfe">Mehrere Adressen mit Komma oder je Zeile eintragen (max. 10). Sind Adressen hinterlegt, gehen «Meldung (Verwaltung)», «Pikettdienst» und «Zählerstände» samt PDF direkt an alle.</span></div>
         <div class="hinweisbox negativ" id="mo-fehler" hidden></div>
       </div>
       <div class="modal-fuss"><button type="button" class="btn" data-schliessen>Abbrechen</button><button class="btn primary-action">Speichern</button></div>
@@ -1080,6 +1080,8 @@ const statusTag = id => `<span class="tag ${stat(id).tag}">${esc(stat(id).name)}
 const artTag = id => `<span class="tag ${art(id).tag}">${esc(art(id).kurz)}</span>`;
 const offen = m => m.status!=='erledigt';
 const obj = nr => { const o=OBJEKTE.find(o=>o.nr===nr); if(o) return o; const a=OBJEKTE_ALT.find(o=>o.nr===nr); if(a) return {...a, strasse:a.strasse+' (gelöscht)'}; const m=MELDUNGEN.find(m=>m.objekt===nr&&m.objektArchiv); return m ? {...m.objektArchiv, strasse:m.objektArchiv.strasse+' (gelöscht)'} : {nr,strasse:`Objekt ${nr} (gelöscht)`,ort:'',kunde:'',email:''}; };
+const mailListe = v => String(v||'').split(/[,;\s]+/).map(a=>a.trim()).filter(Boolean);
+const mailHtmlListe = v => mailListe(v).map(a=>`<a href="mailto:${esc(a)}">${esc(a)}</a>`).join('<br>');
 const sortiereObjekte = l => [...l].sort((a,b)=>a.ort.localeCompare(b.ort,'de')||a.strasse.localeCompare(b.strasse,'de'));
 const unterartText = (m,l='de') => { if(!m.unterart) return ''; if(m.unterart==='andere') return (l==='de'&&m.unterartAndereDe)?m.unterartAndereDe:(m.unterartAndere||nameVon(UNTERARTEN[m.art]||[],'andere',l)); return nameVon(UNTERARTEN[m.art]||[],m.unterart,l); };
 const artVoll = m => art(m.art).n.de + (m.unterart?' · '+unterartText(m):'');
@@ -1750,7 +1752,7 @@ function oeffne(nr){
     <div class="detail-kopf">${statusTag(m.status)} ${artTag(m.art)}</div>
     <dl class="zusammenfassung">
       <dt>Objekt</dt><dd>${esc(o.strasse)}${m.hausnr?' · Hausnr. '+esc(m.hausnr):''}<br>${esc(o.ort)} <span class="nr">(Obj. ${esc(m.objekt)})</span></dd>
-      <dt>Kunde</dt><dd>${esc(o.kunde||'—')}${o.email?`<br><a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`:(m.art!=='intern'?'<br><span class="mail-leer">Keine Kunden-E-Mail hinterlegt</span>':'')}</dd>
+      <dt>Kunde</dt><dd>${esc(o.kunde||'—')}${o.email?`<br>${mailHtmlListe(o.email)}`:(m.art!=='intern'?'<br><span class="mail-leer">Keine Verwaltungs-Adresse hinterlegt</span>':'')}</dd>
       ${m.ort?`<dt>Bereich</dt><dd>${esc(ortText(m))}</dd>`:''}${m.bereich?`<dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd>`:''}
       ${m.intern?`<dt>${m.art==='zaehler'?'Abgelesen':'Zeitpunkt'}</dt><dd>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</dd>`:''}
       ${m.paletten?`<dt>Bestellmenge</dt><dd><strong>${esc(palettenText(m.paletten))}</strong></dd>`:''}
@@ -1838,7 +1840,7 @@ function renderObjekte(){
   $('#objekte-info').textContent=`${OBJEKTE.length} betreute Liegenschaften – diese Liste sehen die Hauswarte bei «Neue Meldung»`;
   $('#tb-objekte').innerHTML=l.map(o=>{const of=MELDUNGEN.filter(m=>m.objekt===o.nr&&offen(m)).length;
     return `<tr><td class="nr">${esc(o.nr)}</td><td class="objekt-zeile"><strong>${esc(o.strasse)}</strong><span>${esc(o.ort)}</span></td><td class="mobil-weg">${esc(o.kunde)}</td>
-      <td class="mobil-weg">${o.email?`<a href="mailto:${esc(o.email)}">${esc(o.email)}</a>`:'<span class="mail-leer">—</span>'}</td>
+      <td class="mobil-weg">${o.email?mailHtmlListe(o.email):'<span class="mail-leer">—</span>'}</td>
       <td class="zahl">${of?`<button class="tag warnung" style="border:0;cursor:pointer" data-meldungen="${esc(o.nr)}" title="Offene Meldungen anzeigen">${of}</button>`:'0'}</td>
       <td class="zahl"><span class="aktionen">
         <button class="icon-btn" data-bearbeiten="${esc(o.nr)}" title="Bearbeiten" aria-label="Objekt ${esc(o.nr)} bearbeiten"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>
@@ -1867,7 +1869,10 @@ $('#form-objekt').addEventListener('submit',e=>{ e.preventDefault();
   if(!w.strasse){fe.push('Strasse fehlt.');mk('strasse');}
   if(!/^\d{4}\s+\S/.test(w.ort)){fe.push('PLZ / Ort bitte im Format «8307 Effretikon».');mk('ort');}
   if(!w.kunde){fe.push('Kunde fehlt.');mk('kunde');}
-  if(w.email&&!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(w.email)){fe.push('E-Mail-Adresse ist ungültig.');mk('email');}
+  const mAdr=mailListe(w.email);
+  if(mAdr.some(a=>!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a))){fe.push('Mindestens eine E-Mail-Adresse ist ungültig. Mehrere Adressen mit Komma trennen.');mk('email');}
+  else if(mAdr.length>10){fe.push('Höchstens 10 Adressen pro Objekt.');mk('email');}
+  else w.email=mAdr.join(', ');
   if(fe.length){ $('#mo-fehler').innerHTML=fe.map(esc).join('<br>'); $('#mo-fehler').hidden=false; return; }
   if(SERVER){
     const alt=bearbeiteNr;
@@ -1882,7 +1887,7 @@ $('#form-objekt').addEventListener('submit',e=>{ e.preventDefault();
   else { OBJEKTE.push(w); hinweis('#objekt-meldung',`Objekt ${w.nr} wurde hinzugefügt und ist ab sofort für die Hauswarte auswählbar.`); }
   $('#modal-objekt').classList.remove('offen'); renderAdmin(); renderObjektliste();
 });
-$('#btn-objekte-csv').addEventListener('click',()=>csvLaden('objektliste-hauswartung.csv',['Objektnummer','Kunde','Strasse','PLZ / Ort','Kunden-E-Mail'],
+$('#btn-objekte-csv').addEventListener('click',()=>csvLaden('objektliste-hauswartung.csv',['Objektnummer','Kunde','Strasse','PLZ / Ort','E-Mail Verwaltung'],
   [...OBJEKTE].sort((a,b)=>(+a.nr||0)-(+b.nr||0)).map(o=>[o.nr,o.kunde,o.strasse,o.ort,o.email])));
 
 /* ---------- Hauswarte ---------- */
