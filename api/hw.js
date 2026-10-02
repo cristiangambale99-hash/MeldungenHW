@@ -155,9 +155,14 @@ const AKTIONEN = {
   async objekt_speichern({ token, alt, objekt }) {
     adminPruefen(token);
     const o = objekt || {}, w = {};
-    ['nr', 'kunde', 'strasse', 'ort', 'email'].forEach(k => { w[k] = String(o[k] ?? '').trim().replace(/\s+/g, ' ').slice(0, 200); });
+    ['nr', 'kunde', 'strasse', 'ort'].forEach(k => { w[k] = String(o[k] ?? '').trim().replace(/\s+/g, ' ').slice(0, 200); });
+    w.email = String(o.email ?? '').trim().replace(/[ \t]+/g, ' ').slice(0, 600);
     if (!/^\d{1,6}$/.test(w.nr) || !w.strasse || !w.kunde || !/^\d{4}\s+\S/.test(w.ort)) throw new Fehler(400, 'objekt_ungueltig');
-    if (w.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(w.email)) throw new Fehler(400, 'email_ungueltig');
+    // Mehrere Verwaltungs-Adressen erlaubt (Komma, Strichpunkt oder Zeilenumbruch getrennt)
+    const adressen = w.email.split(/[,;\s]+/).map(a => a.trim()).filter(Boolean);
+    if (adressen.some(a => !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(a))) throw new Fehler(400, 'email_ungueltig');
+    if (adressen.length > 10) throw new Fehler(400, 'zu_viele_adressen');
+    w.email = adressen.join(', ');
     return rpc('hw_objekt_speichern', { p_alt: alt || null, p_o: w });
   },
   async objekt_loeschen({ token, nr }) { adminPruefen(token); return rpc('hw_objekt_loeschen', { p_nr: String(nr) }); },
