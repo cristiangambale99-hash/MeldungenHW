@@ -102,6 +102,8 @@ const AKTIONEN = {
     const daten = { ...m, pnr: h.pnr, hwName: hwName(h), mail: 'offen' };
     const r = await rpc('hw_meldung_neu', { p_client: client_id, p_pnr: h.pnr, p_objekt: m.objekt, p_art: m.art, p_daten: daten, p_fotos: f });
     if (!r.neu && r.meldung.mail === 'gesendet') return { meldung: r.meldung, doppelt: true };
+    // Hat die Hauswartung es selbst erledigt, steht die Meldung sofort auf «Erledigt»
+    if (r.neu && m.massnahme === 'erledigt') await rpc('hw_meldung_aendern', { p_nr: r.meldung.nr, p_status: 'erledigt', p_daten: {} });
     return { meldung: await verarbeite(r.meldung.nr) };
   },
 
