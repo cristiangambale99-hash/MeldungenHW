@@ -476,6 +476,14 @@ img.brand-logo{width:100%;max-width:168px}
       </div>
     </section>
 
+    <!-- Wer erledigt das? (Verwaltung und Pikett) -->
+    <section class="hw-screen" data-screen="sMassnahme">
+      <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
+      <h1 data-t="mn_titel"></h1>
+      <p class="lead" data-t="mn_text"></p>
+      <div class="kacheln" id="hw-massnahmen"></div>
+    </section>
+
     <!-- Zählerstände -->
     <section class="hw-screen" data-screen="sZaehler">
       <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
@@ -628,6 +636,7 @@ img.brand-logo{width:100%;max-width:168px}
           <input type="search" id="suche" placeholder="Suchen nach Objekt, Kunde, Mieter, Beschreibung, Nummer, Hauswart" aria-label="Suche">
           <select id="filter-art" aria-label="Art"><option value="">Alle Arten</option></select>
           <select id="filter-status" aria-label="Status"><option value="">Alle Status</option></select>
+          <select id="filter-massnahme" aria-label="Massnahme"><option value="">Alle Massnahmen</option></select>
         </div>
         <div class="table-wrap">
           <table class="table">
@@ -898,6 +907,19 @@ const UNTERARTEN = {
     {id:'rohrreinigung',   n:{de:'Rohrreinigung',it:'Pulizia tubature',pt:'Limpeza de canos',es:'Limpieza de tuberías'}},
     {id:'andere',          n:{de:'Andere',it:'Altro',pt:'Outro',es:'Otro'}}]
 };
+/* Massnahme bei Meldungen an die Verwaltung: Techniker nötig oder bereits erledigt */
+const MASSNAHMEN = [
+  {id:'techniker', kurz:'Techniker nötig', tag:'warnung',
+   n:{de:'Techniker wird benötigt',it:'Serve un tecnico',pt:'É preciso um técnico',es:'Se necesita un técnico'},
+   d:{de:'Die Verwaltung muss einen Handwerker aufbieten',it:'L’amministrazione deve incaricare un artigiano',pt:'A administração tem de chamar um técnico',es:'La administración debe encargar a un técnico'}},
+  {id:'erledigt', kurz:'Erledigt durch HW', tag:'positiv',
+   n:{de:'Erledigt durch Hauswartung',it:'Risolto dal servizio di custodia',pt:'Resolvido pela conciergeria',es:'Resuelto por la conserjería'},
+   d:{de:'Wir haben es bereits in Ordnung gebracht',it:'Abbiamo già sistemato tutto',pt:'Já tratámos do assunto',es:'Ya lo hemos solucionado'}}
+];
+const MIT_MASSNAHME = ['verwaltung','pikett'];
+const massnahme = id => MASSNAHMEN.find(m=>m.id===id) || null;
+const massnahmeName = (id,l='de') => { const m=massnahme(id); return m ? (m.n[l]||m.n.de) : ''; };
+const massnahmeTag = id => { const m=massnahme(id); return m ? `<span class="tag ${m.tag}">${esc(m.kurz)}</span>` : ''; };
 /* Bestellungen: brauchen zusätzlich die Palettenmenge */
 const BESTELLUNGEN = ['regeneriersalz','streusalz'];
 const istBestellung = e => e.art==='intern' && BESTELLUNGEN.includes(e.unterart);
@@ -992,6 +1014,7 @@ de:{login_titel:'Anmelden',login_text:'Bitte gib deine Personalnummer ein.',admi
   s2_titel:'Wo genau?',hausnr:'Hausnummer',hausnr_ph:'z. B. 17a',ort_titel:'Bereich',stockwerk_titel:'Stockwerk',mieter_name:'Name des Mieters',mieter_ph:'Nachname des Mieters',andere_titel:'Welcher Bereich genau?',andere_ph:'z. B. Dachboden, Lift, Briefkastenanlage',e_andere:'Bitte gib an, welcher Bereich gemeint ist.',
   z_titel:'Zählerstände',z_text:'Tippe auf die Zähler, die du abgelesen hast, und trage die Stände ein.',z_wann:'Wann abgelesen?',z_zuletzt:'Zuletzt',f_zaehler:'Zählerstände',e_zaehler:'Bitte tippe auf mindestens einen Zähler.',e_zaehler_wert:'Bitte trage bei jedem gewählten Zähler den Stand als Zahl ein.',s5_titel_zaehler:'Fotos vom Zähler',s5_text_zaehler:'Freiwillig: Foto des Zählers und eine Bemerkung.',
   paletten_titel:'Wie viele Paletten?',paletten_einheit:'Paletten',paletten_hinweis:'Die Bestellung geht an die Hauswartung.',f_menge:'Menge',e_paletten:'Bitte gib die Anzahl Paletten als Zahl ein.',
+  mn_titel:'Wer erledigt das?',mn_text:'Tippe auf das Passende. Die Verwaltung sieht diese Angabe zuoberst im Rapport.',f_massnahme:'Massnahme',e_massnahme:'Bitte tippe an, wer das erledigt.',
   s3_titel:'Welches Stockwerk?',s3_text:'Tippe auf das Stockwerk oder den Aussenbereich.',unterart_titel_verwaltung:'Was ist los?',unterart_titel_intern:'Was für eine Information?',was_text:'Tippe auf das Passende.',i_wann:'Wann?',i_zeit:'Uhrzeit',einsatz_titel:'Dein Einsatz',einsatz_text:'Wer hat dich aufgeboten und wie lange warst du im Einsatz?',s5_titel_pikett:'Was hast du gemacht?',s5_titel_intern:'Bemerkung',s5_text_intern:'Freiwillig: Möchtest du noch etwas ergänzen?',f_was:'Was',f_zeit:'Zeitpunkt',f_bemerkung:'Bemerkung',e_zeit:'Bitte gib Datum und Uhrzeit an.',weitere_objekt:'Weitere Meldung zum gleichen Objekt',art_wechseln:'Art der Meldung ändern? Du beginnst dann auf der Startseite neu.',unterart_andere:'Was genau?',p_auftrag_ph:'z. B. Verwaltung Frau Müller',p_auftrag:'Von wem hast du den Auftrag erhalten?',e_unterart_verwaltung:'Bitte tippe auf die Art der Meldung.',e_unterart_intern:'Bitte tippe auf die Art der Information.',e_unterart_andere:'Bitte schreibe kurz, worum es geht.',e_auftrag:'Bitte gib an, von wem du den Auftrag erhalten hast.',
   s4_titel:'Art der Meldung',s4_text:'Tippe auf die passende Art.',
   pikett_titel:'Wann warst du im Einsatz?',p_datum:'Datum',p_von:'Von',p_bis:'Bis',heute:'Heute',gestern:'Gestern',p_dauer:'Einsatzdauer',
@@ -1011,6 +1034,7 @@ it:{login_titel:'Accedi',login_text:'Inserisci il tuo numero personale.',admin_l
   s2_titel:'Dove esattamente?',hausnr:'Numero civico',hausnr_ph:'es. 17a',ort_titel:'Zona',stockwerk_titel:'Piano',mieter_name:'Nome dell’inquilino',mieter_ph:'Cognome dell’inquilino',andere_titel:'Quale zona esattamente?',andere_ph:'es. solaio, ascensore, cassette postali',e_andere:'Indica di quale zona si tratta.',
   z_titel:'Letture contatori',z_text:'Tocca i contatori che hai letto e inserisci i valori.',z_wann:'Quando hai letto?',z_zuletzt:'Ultima volta',f_zaehler:'Letture',e_zaehler:'Tocca almeno un contatore.',e_zaehler_wert:'Inserisci un numero per ogni contatore scelto.',s5_titel_zaehler:'Foto del contatore',s5_text_zaehler:'Facoltativo: foto del contatore e una nota.',
   paletten_titel:'Quanti pallet?',paletten_einheit:'pallet',paletten_hinweis:'L’ordine viene inviato alla Hauswartung.',f_menge:'Quantità',e_paletten:'Inserisci il numero di pallet.',
+  mn_titel:'Chi se ne occupa?',mn_text:'Tocca la voce giusta. L’amministrazione la vede in cima al rapporto.',f_massnahme:'Provvedimento',e_massnahme:'Tocca chi se ne occupa.',
   s3_titel:'Quale piano?',s3_text:'Tocca il piano o l’esterno.',unterart_titel_verwaltung:'Cosa succede?',unterart_titel_intern:'Che tipo di informazione?',was_text:'Tocca la voce giusta.',i_wann:'Quando?',i_zeit:'Ora',einsatz_titel:'Il tuo intervento',einsatz_text:'Chi ti ha chiamato e quanto è durato l’intervento?',s5_titel_pikett:'Cosa hai fatto?',s5_titel_intern:'Nota',s5_text_intern:'Facoltativo: vuoi aggiungere qualcosa?',f_was:'Cosa',f_zeit:'Momento',f_bemerkung:'Nota',e_zeit:'Indica data e ora.',weitere_objekt:'Altra segnalazione per lo stesso stabile',art_wechseln:'Cambiare il tipo di segnalazione? Ricominci dalla pagina iniziale.',unterart_andere:'Cosa esattamente?',p_auftrag_ph:'es. amministrazione, sig.ra Müller',p_auftrag:'Da chi hai ricevuto l’incarico?',e_unterart_verwaltung:'Tocca il tipo di segnalazione.',e_unterart_intern:'Tocca il tipo di informazione.',e_unterart_andere:'Scrivi brevemente di cosa si tratta.',e_auftrag:'Indica da chi hai ricevuto l’incarico.',
   s4_titel:'Tipo di segnalazione',s4_text:'Tocca il tipo corretto.',
   pikett_titel:'Quando sei intervenuto?',p_datum:'Data',p_von:'Da',p_bis:'A',heute:'Oggi',gestern:'Ieri',p_dauer:'Durata intervento',
@@ -1030,6 +1054,7 @@ pt:{login_titel:'Entrar',login_text:'Introduz o teu número de pessoal.',admin_l
   s2_titel:'Onde exatamente?',hausnr:'Número da porta',hausnr_ph:'ex. 17a',ort_titel:'Zona',stockwerk_titel:'Piso',mieter_name:'Nome do inquilino',mieter_ph:'Apelido do inquilino',andere_titel:'Que zona exatamente?',andere_ph:'ex. sótão, elevador, caixas de correio',e_andere:'Indica de que zona se trata.',
   z_titel:'Leitura de contadores',z_text:'Toca nos contadores que leste e introduz os valores.',z_wann:'Quando leste?',z_zuletzt:'Última vez',f_zaehler:'Leituras',e_zaehler:'Toca em pelo menos um contador.',e_zaehler_wert:'Introduz um número para cada contador escolhido.',s5_titel_zaehler:'Foto do contador',s5_text_zaehler:'Opcional: foto do contador e uma nota.',
   paletten_titel:'Quantas paletes?',paletten_einheit:'paletes',paletten_hinweis:'A encomenda vai para a Hauswartung.',f_menge:'Quantidade',e_paletten:'Introduz o número de paletes.',
+  mn_titel:'Quem trata disto?',mn_text:'Toca na opção certa. A administração vê esta indicação no topo do relatório.',f_massnahme:'Medida',e_massnahme:'Toca em quem trata disto.',
   s3_titel:'Que piso?',s3_text:'Toca no piso ou no exterior.',unterart_titel_verwaltung:'O que se passa?',unterart_titel_intern:'Que tipo de informação?',was_text:'Toca na opção certa.',i_wann:'Quando?',i_zeit:'Hora',einsatz_titel:'O teu serviço',einsatz_text:'Quem te chamou e quanto tempo durou o serviço?',s5_titel_pikett:'O que fizeste?',s5_titel_intern:'Observação',s5_text_intern:'Opcional: queres acrescentar algo?',f_was:'O quê',f_zeit:'Momento',f_bemerkung:'Observação',e_zeit:'Indica data e hora.',weitere_objekt:'Outra comunicação para o mesmo edifício',art_wechseln:'Mudar o tipo de comunicação? Recomeças na página inicial.',unterart_andere:'O quê exatamente?',p_auftrag_ph:'ex. administração, Sra. Müller',p_auftrag:'Quem te deu o pedido?',e_unterart_verwaltung:'Toca no tipo de comunicação.',e_unterart_intern:'Toca no tipo de informação.',e_unterart_andere:'Escreve brevemente do que se trata.',e_auftrag:'Indica quem te deu o pedido.',
   s4_titel:'Tipo de comunicação',s4_text:'Toca no tipo certo.',
   pikett_titel:'Quando estiveste em serviço?',p_datum:'Data',p_von:'De',p_bis:'Até',heute:'Hoje',gestern:'Ontem',p_dauer:'Duração',
@@ -1049,6 +1074,7 @@ es:{login_titel:'Entrar',login_text:'Introduce tu número de personal.',admin_li
   s2_titel:'¿Dónde exactamente?',hausnr:'Número de portal',hausnr_ph:'p. ej. 17a',ort_titel:'Zona',stockwerk_titel:'Planta',mieter_name:'Nombre del inquilino',mieter_ph:'Apellido del inquilino',andere_titel:'¿Qué zona exactamente?',andere_ph:'p. ej. desván, ascensor, buzones',e_andere:'Indica de qué zona se trata.',
   z_titel:'Lectura de contadores',z_text:'Toca los contadores que has leído e introduce los valores.',z_wann:'¿Cuándo lo has leído?',z_zuletzt:'Última vez',f_zaehler:'Lecturas',e_zaehler:'Toca al menos un contador.',e_zaehler_wert:'Introduce un número en cada contador elegido.',s5_titel_zaehler:'Foto del contador',s5_text_zaehler:'Opcional: foto del contador y una nota.',
   paletten_titel:'¿Cuántos palés?',paletten_einheit:'palés',paletten_hinweis:'El pedido se envía a la Hauswartung.',f_menge:'Cantidad',e_paletten:'Introduce el número de palés.',
+  mn_titel:'¿Quién se encarga?',mn_text:'Toca la opción correcta. La administración lo ve arriba en el informe.',f_massnahme:'Medida',e_massnahme:'Toca quién se encarga.',
   s3_titel:'¿Qué planta?',s3_text:'Toca la planta o el exterior.',unterart_titel_verwaltung:'¿Qué pasa?',unterart_titel_intern:'¿Qué tipo de información?',was_text:'Toca la opción correcta.',i_wann:'¿Cuándo?',i_zeit:'Hora',einsatz_titel:'Tu intervención',einsatz_text:'¿Quién te llamó y cuánto duró la intervención?',s5_titel_pikett:'¿Qué hiciste?',s5_titel_intern:'Observación',s5_text_intern:'Opcional: ¿quieres añadir algo?',f_was:'Qué',f_zeit:'Momento',f_bemerkung:'Observación',e_zeit:'Indica fecha y hora.',weitere_objekt:'Otro aviso para el mismo edificio',art_wechseln:'¿Cambiar el tipo de aviso? Empiezas de nuevo en la página inicial.',unterart_andere:'¿Qué exactamente?',p_auftrag_ph:'p. ej. administración, Sra. Müller',p_auftrag:'¿Quién te dio el encargo?',e_unterart_verwaltung:'Toca el tipo de aviso.',e_unterart_intern:'Toca el tipo de información.',e_unterart_andere:'Escribe brevemente de qué se trata.',e_auftrag:'Indica quién te dio el encargo.',
   s4_titel:'Tipo de aviso',s4_text:'Toca el tipo correcto.',
   pikett_titel:'¿Cuándo estuviste de guardia?',p_datum:'Fecha',p_von:'De',p_bis:'A',heute:'Hoy',gestern:'Ayer',p_dauer:'Duración',
@@ -1103,25 +1129,26 @@ const imMonat = m => m.art==='pikett' && m.pikett && m.pikett.datum.slice(0,7)==
    ===================================================================== */
 let L='de', user=null, screen='login', entwurf;
 const jetztGerundet = () => { const d=new Date(); const m=Math.floor(d.getMinutes()/5)*5; return `${String(d.getHours()).padStart(2,'0')}:${String(m).padStart(2,'0')}`; };
-const leererEntwurf = (art=null) => ({objekt:null,hausnr:'',ort:null,mieter:'',andere:'',bereich:null,art,unterart:null,unterartAndere:'',pikett:{datum:isoTag(heute),von:'',bis:'',auftraggeber:''},intern:{datum:isoTag(heute),zeit:jetztGerundet()},zaehler:{},paletten:'',text:'',fotos:[]});
+const leererEntwurf = (art=null) => ({objekt:null,hausnr:'',ort:null,mieter:'',andere:'',bereich:null,art,unterart:null,unterartAndere:'',pikett:{datum:isoTag(heute),von:'',bis:'',auftraggeber:''},intern:{datum:isoTag(heute),zeit:jetztGerundet()},zaehler:{},paletten:'',massnahme:null,text:'',fotos:[]});
 entwurf = leererEntwurf();
 const t = (k,n) => (T[L][k]??T.de[k]??k).replace('{n}',n??'');
 /* Ablauf je Art der Meldung – nur die Fragen, die es wirklich braucht */
 const ABLAUF = {
-  verwaltung:['s1','s2','sWas','s5','s6'],     /* Objekt · Wo genau · Was ist los · Beschreibung · Prüfen */
-  pikett:    ['s1','s2','sEinsatz','s5','s6'], /* Objekt · Wo genau · Einsatz · Einsatzbeschrieb · Prüfen */
+  verwaltung:['s1','s2','sWas','sMassnahme','s5','s6'],     /* Objekt · Wo genau · Was ist los · Wer erledigt · Beschreibung · Prüfen */
+  pikett:    ['s1','s2','sEinsatz','sMassnahme','s5','s6'], /* Objekt · Wo genau · Einsatz · Wer erledigt · Einsatzbeschrieb · Prüfen */
   intern:    ['s1','sWas','s5','s6'],          /* Objekt · Was & wann · Bemerkung · Prüfen */
   zaehler:   ['s1','sZaehler','s5','s6']       /* Objekt · Zählerstände · Fotos & Bemerkung · Prüfen */
 };
 const ablauf = () => ABLAUF[entwurf.art] || ABLAUF.verwaltung;
 const MIT_ORT = ['verwaltung','pikett'];   /* Arten mit Hausnummer, Bereich und Stockwerk */
-const FUSS = {login:{z:false,w:'anmelden'},s1:{z:true,w:null},s2:{z:true,w:'weiter'},sWas:{z:true,w:'weiter'},sZaehler:{z:true,w:'weiter'},sEinsatz:{z:true,w:'weiter'},s5:{z:true,w:'weiter'},s6:{z:true,w:'senden'},meine:{z:true,w:null}};
+const FUSS = {login:{z:false,w:'anmelden'},s1:{z:true,w:null},s2:{z:true,w:'weiter'},sWas:{z:true,w:'weiter'},sMassnahme:{z:true,w:'weiter'},sZaehler:{z:true,w:'weiter'},sEinsatz:{z:true,w:'weiter'},s5:{z:true,w:'weiter'},s6:{z:true,w:'senden'},meine:{z:true,w:null}};
 
 function uebersetze(){
   document.documentElement.lang = L==='de'?'de-CH':L;
   $$('[data-t]').forEach(e=>e.textContent=t(e.dataset.t));
   $$('[data-schritt]').forEach(e=>e.textContent=t('schritt',e.dataset.schritt));
   if(entwurf.art==='zaehler') renderZaehler();
+  if(MIT_MASSNAHME.includes(entwurf.art)) renderMassnahmen();
   $('#sprache').value=L;
   $('#hw-pnr').placeholder='00000'; $('#hw-objekt-suche').placeholder=t('suche');
   $('#hw-hausnr').placeholder=t('hausnr_ph'); $('#hw-mieter').placeholder=t('mieter_ph'); $('#hw-p-auftrag').placeholder=t('p_auftrag_ph'); $('#hw-andere').placeholder=t('andere_ph'); $('#hw-text').placeholder=t('text_ph');
@@ -1149,6 +1176,7 @@ function zeigeScreen(s, still){
   if(s==='s2'&&entwurf.objekt){ const o=obj(entwurf.objekt); $('#hw-objekt-info').innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><div><strong>${esc(o.strasse)}</strong>${esc(o.ort)} · ${esc(o.kunde)}</div>`; }
   if(s==='sWas') renderUnterarten();
   if(s==='sZaehler') renderZaehler();
+  if(s==='sMassnahme') renderMassnahmen();
   if(s==='s5'){ const k={pikett:'_pikett',intern:'_intern',zaehler:'_zaehler'}[entwurf.art]||''; $('#hw-s5-titel').textContent=t('s5_titel'+k); $('#hw-s5-text').textContent=t('s5_text'+k); }
   if(s==='s6') renderPruef();
   if(s==='meine'&&user) renderMeine();
@@ -1193,7 +1221,7 @@ $('#hw-pnr').addEventListener('input',e=>{ e.target.value=e.target.value.replace
 $('#hw-logout').addEventListener('click',abmeldenHw);
 
 /* Start */
-const SCHRITTE_MIT_ENTWURF=['s1','s2','sWas','sZaehler','sEinsatz','s5','s6'];
+const SCHRITTE_MIT_ENTWURF=['s1','s2','sWas','sMassnahme','sZaehler','sEinsatz','s5','s6'];
 function speichereEntwurf(){ try{ if(user && entwurf.art) localStorage.setItem('hw_entwurf',JSON.stringify({pnr:user.pnr,screen,entwurf,zeit:Date.now()})); }catch(_){ } }
 function ladeEntwurf(){ try{ const d=JSON.parse(localStorage.getItem('hw_entwurf')||'null'); if(d&&user&&d.pnr===user.pnr&&Date.now()-d.zeit<3*864e5) return d; }catch(_){ } return null; }
 function loescheEntwurf(){ try{ localStorage.removeItem('hw_entwurf'); }catch(_){ } }
@@ -1247,6 +1275,14 @@ $('#hw-mieter').addEventListener('blur',()=>{ if(brauchtStockwerk(entwurf)&&!ent
 /* 3 Bereich */
 function renderBereiche(){ $('#hw-bereiche').innerHTML=BEREICHE.map(o=>`<button type="button" class="kachel${entwurf.bereich===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); }
 $('#hw-bereiche').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.bereich=b.dataset.v; renderBereiche(); fehlerHw('');});
+
+/* Wer erledigt das? */
+function renderMassnahmen(){
+  $('#hw-massnahmen').innerHTML=MASSNAHMEN.map(m=>`<button type="button" class="kachel breit${entwurf.massnahme===m.id?' gewaehlt':''}" data-v="${m.id}">${esc(m.n[L]||m.n.de)}<small>${esc(m.d[L]||m.d.de)}</small></button>`).join('');
+}
+$('#hw-massnahmen').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return;
+  entwurf.massnahme=b.dataset.v; renderMassnahmen(); fehlerHw(''); speichereEntwurf();
+  setTimeout(()=>{ if(screen==='sMassnahme') zeigeScreen(naechster('sMassnahme')); },260); });
 
 /* Zählerstände erfassen */
 function letzterStand(objekt, art){
@@ -1346,6 +1382,7 @@ function renderPruef(){
   if(a==='zaehler') h += z('f_zaehler',ZAEHLERARTEN.filter(x=>entwurf.zaehler[x.id]).map(x=>`<b>${esc(x.n[L]||x.n.de)}</b> ${esc(entwurf.zaehler[x.id].wert)} ${esc(entwurf.zaehler[x.id].einheit)}`).join('<br>'),'sZaehler')
     + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sZaehler');
   if(a==='pikett'){ const p=entwurf.pikett; h+=z('f_auftrag',esc(p.auftraggeber.trim()),'sEinsatz')+z('f_einsatz',`${datumIso(p.datum)}, ${esc(p.von)}–${esc(p.bis)}<br><b>${esc(dauerText(pikettMinuten(p),L))}</b>`,'sEinsatz'); }
+  if(MIT_MASSNAHME.includes(a)) h += z('f_massnahme',`<b>${esc(massnahmeName(entwurf.massnahme,L))}</b>`,'sMassnahme');
   h += z(['intern','zaehler'].includes(a)?'f_bemerkung':'f_text',esc(entwurf.text.trim())||'—','s5') + z('f_fotos',entwurf.fotos.length,'s5');
   $('#hw-pruef').innerHTML=h;
 }
@@ -1381,6 +1418,7 @@ function pruefeSchritt(s){
       if(!w || isNaN(Number(w))){ const f=$(`#hw-zaehler-werte input[data-z="${id}"]`); if(f){ f.classList.add('fehlerhaft'); f.focus(); } return 'e_zaehler_wert'; } }
     if(!entwurf.intern.datum||!entwurf.intern.zeit) return 'e_zeit';
   }
+  if(s==='sMassnahme'&&!entwurf.massnahme) return 'e_massnahme';
   if(s==='sEinsatz'){
     if(entwurf.art==='pikett'){ const p=entwurf.pikett;
       if(!p.auftraggeber.trim()){ $('#hw-p-auftrag').classList.add('fehlerhaft'); $('#hw-p-auftrag').focus(); return 'e_auftrag'; }
@@ -1424,7 +1462,7 @@ function sendenServer(){
   const zaehler=entwurf.art==='zaehler';
   const meldung={objekt:entwurf.objekt, hausnr:entwurf.hausnr, ort:entwurf.ort, mieter:entwurf.mieter, andere:entwurf.andere, bereich:entwurf.bereich,
     intern:(intern||zaehler)?{...entwurf.intern}:null, art:entwurf.art, unterart:entwurf.unterart, unterartAndere:entwurf.unterartAndere,
-    pikett:entwurf.art==='pikett'?{...entwurf.pikett}:null, text:entwurf.text, paletten:istBestellung(entwurf)?String(entwurf.paletten).replace(',','.'):null,
+    pikett:entwurf.art==='pikett'?{...entwurf.pikett}:null, massnahme:MIT_MASSNAHME.includes(entwurf.art)?entwurf.massnahme:null, text:entwurf.text, paletten:istBestellung(entwurf)?String(entwurf.paletten).replace(',','.'):null,
     zaehler:zaehler?ZAEHLERARTEN.filter(z=>entwurf.zaehler[z.id]).map(z=>({art:z.id, wert:String(entwurf.zaehler[z.id].wert).trim(), einheit:entwurf.zaehler[z.id].einheit})):null};
   const a={client_id:uuid(), meldung, fotos:[...entwurf.fotos], seit:Date.now()};
   ausgang.rein(a); loescheEntwurf(); okAuftrag=a.client_id;
@@ -1439,7 +1477,8 @@ function senden(){
     bereich:intern?null:entwurf.bereich, intern:intern?{...entwurf.intern}:null,
     zaehler:entwurf.art==='zaehler'?ZAEHLERARTEN.filter(z=>entwurf.zaehler[z.id]).map(z=>({art:z.id, wert:String(entwurf.zaehler[z.id].wert).trim(), einheit:entwurf.zaehler[z.id].einheit})):null,
     paletten:istBestellung(entwurf)?String(entwurf.paletten).replace(',','.'):null, art:entwurf.art, unterart:UNTERARTEN[entwurf.art]?entwurf.unterart:'', unterartAndere:entwurf.unterart==='andere'?entwurf.unterartAndere.trim():'', pikett:entwurf.art==='pikett'?{...entwurf.pikett,auftraggeber:entwurf.pikett.auftraggeber.trim()}:null, text:entwurf.text.trim(),
-    status:'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
+    massnahme:MIT_MASSNAHME.includes(entwurf.art)?entwurf.massnahme:null,
+    status:(MIT_MASSNAHME.includes(entwurf.art)&&entwurf.massnahme==='erledigt')?'erledigt':'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
   loescheEntwurf(); $('#hw-ok-nr').textContent=t('ok_nr',nr); renderAdmin(); zeigeScreen('ok');
   const neu=MELDUNGEN.find(m=>m.nr===nr); uebersetzeVorVersand(neu).then(()=>sendeMail(neu));
 }
@@ -1716,26 +1755,27 @@ $('#btn-zaehler-csv').addEventListener('click',()=>csvLaden('hauswartung-zaehler
   ['Abgelesen','Objektnummer','Kunde','Strasse','PLZ / Ort','Zähler','Stand','Einheit','Verbrauch seit letzter Ablesung','Hauswart','Meldung Nr.'],
   gefilterteZaehler().map(z=>{const o=obj(z.objekt); return [datumIso(z.datum),z.objekt,o.kunde,o.strasse,o.ort,zaehlerName(z.art),z.wert,z.einheit,z.verbrauch===null?'':z.verbrauch,z.hauswart,z.nr];})));
 STATUS.forEach(s=>$('#filter-status').insertAdjacentHTML('beforeend',`<option value="${s.id}">${esc(s.name)}</option>`));
-['#suche','#filter-art','#filter-status'].forEach(s=>$(s).addEventListener('input',renderMeldungen));
+MASSNAHMEN.forEach(m=>$('#filter-massnahme').insertAdjacentHTML('beforeend',`<option value="${m.id}">${esc(m.n.de)}</option>`));
+['#suche','#filter-art','#filter-status','#filter-massnahme'].forEach(s=>$(s).addEventListener('input',renderMeldungen));
 function gefiltert(){
-  const q=$('#suche').value.trim().toLowerCase(), a=$('#filter-art').value, st=$('#filter-status').value;
-  return MELDUNGEN.filter(m=>(!a||m.art===a)&&(!st||m.status===st)&&(!q||[m.nr,m.objekt,obj(m.objekt).strasse,obj(m.objekt).ort,obj(m.objekt).kunde,m.mieter,m.andere,m.text,m.textDe,unterartText(m),m.pikett?m.pikett.auftraggeber:'',m.hwName].join(' ').toLowerCase().includes(q))).sort((x,y)=>y.nr-x.nr);
+  const q=$('#suche').value.trim().toLowerCase(), a=$('#filter-art').value, st=$('#filter-status').value, mn=$('#filter-massnahme').value;
+  return MELDUNGEN.filter(m=>(!a||m.art===a)&&(!st||m.status===st)&&(!mn||m.massnahme===mn)&&(!q||[m.nr,m.objekt,obj(m.objekt).strasse,obj(m.objekt).ort,obj(m.objekt).kunde,m.mieter,m.andere,m.text,m.textDe,unterartText(m),m.pikett?m.pikett.auftraggeber:'',m.hwName].join(' ').toLowerCase().includes(q))).sort((x,y)=>y.nr-x.nr);
 }
 function renderMeldungen(){
   const l=gefiltert(); $('#leer-meldungen').hidden=l.length>0;
   $('#tb-meldungen').innerHTML=l.map(m=>`<tr class="${m.status==='neu'?'hinweis':''} klickbar" onclick="oeffne(${m.nr})">
     <td class="nr">#${m.nr}</td>
     <td class="objekt-zeile"><strong>${esc(obj(m.objekt).strasse)}</strong><span>${m.hausnr?'Hausnr. '+esc(m.hausnr)+' · ':''}${esc(obj(m.objekt).ort)} · ${esc(obj(m.objekt).kunde)}</span></td>
-    <td>${artTag(m.art)} ${uebersetzungTag(m)}${m.unterart?`<br><span class="nr" style="font-size:11.5px">${esc(unterartText(m))}${m.paletten?' · '+esc(palettenText(m.paletten)):''}</span>`:''}</td>
+    <td>${artTag(m.art)} ${m.massnahme?massnahmeTag(m.massnahme):''} ${uebersetzungTag(m)}${m.unterart?`<br><span class="nr" style="font-size:11.5px">${esc(unterartText(m))}${m.paletten?' · '+esc(palettenText(m.paletten)):''}</span>`:''}</td>
     <td class="mobil-weg objekt-zeile">${m.art==='zaehler'?`<span>${esc(zaehlerListe(m).map(z=>zaehlerName(z.art)+' '+z.wert+' '+z.einheit).join(' · ')||'—')}</span>`:m.ort?`<strong style="font-weight:normal">${esc(ortText(m))}</strong><span>${m.bereich?esc(nameVon(BEREICHE,m.bereich)):''}</span>`:(m.intern?`<span>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</span>`:'—')}</td>
     <td class="mobil-weg">${datum(m.gemeldet)}</td><td class="mobil-weg">${esc(m.hwName)}</td><td>${statusTag(m.status)}</td></tr>`).join('');
 }
 $('#btn-csv').addEventListener('click',()=>csvLaden('hauswartung-meldungen.csv',
-  ['Nr','Objektnummer','Strasse','Hausnummer','PLZ / Ort','Kunde','Bereich','Mieter','Bereich (Andere)','Stockwerk','Art','Art der Meldung','Pikett Auftrag von','Pikett Datum','Von','Bis','Einsatz (Min.)','Admin (Min.)','Total (Std.)','Bestellmenge (Paletten)','Zählerstände','Beschreibung (Original)','Originalsprache','Beschreibung (Deutsch)','Status','Gemeldet','Hauswart','Personalnummer'],
+  ['Nr','Objektnummer','Strasse','Hausnummer','PLZ / Ort','Kunde','Bereich','Mieter','Bereich (Andere)','Stockwerk','Art','Art der Meldung','Pikett Auftrag von','Pikett Datum','Von','Bis','Einsatz (Min.)','Admin (Min.)','Total (Std.)','Massnahme','Bestellmenge (Paletten)','Zählerstände','Beschreibung (Original)','Originalsprache','Beschreibung (Deutsch)','Status','Gemeldet','Hauswart','Personalnummer'],
   gefiltert().map(m=>{const o=obj(m.objekt), pm=m.pikett?pikettMinuten(m.pikett):'';
     return [m.nr,m.objekt,o.strasse,m.hausnr,o.ort,o.kunde,nameVon(ORTE,m.ort),m.mieter,m.andere||'',nameVon(BEREICHE,m.bereich),art(m.art).n.de,unterartText(m),m.pikett?m.pikett.auftraggeber||'':'',
       m.pikett?datumIso(m.pikett.datum):'',m.pikett?m.pikett.von:'',m.pikett?m.pikett.bis:'',pm,m.pikett?ADMIN_MIN_PIKETT:'',m.pikett?dezStd(pm+ADMIN_MIN_PIKETT):'',
-      m.paletten||'', zaehlerListe(m).map(z=>`${zaehlerName(z.art)}: ${z.wert} ${z.einheit}`).join(' | '),
+      massnahmeName(m.massnahme), m.paletten||'', zaehlerListe(m).map(z=>`${zaehlerName(z.art)}: ${z.wert} ${z.einheit}`).join(' | '),
       m.text,m.sprache||'',textFuerVerwaltung(m),stat(m.status).name,datum(m.gemeldet),m.hwName,m.pnr];})));
 
 /* Detail */
@@ -1755,6 +1795,7 @@ function oeffne(nr){
       <dt>Kunde</dt><dd>${esc(o.kunde||'—')}${o.email?`<br>${mailHtmlListe(o.email)}`:(m.art!=='intern'?'<br><span class="mail-leer">Keine Verwaltungs-Adresse hinterlegt</span>':'')}</dd>
       ${m.ort?`<dt>Bereich</dt><dd>${esc(ortText(m))}</dd>`:''}${m.bereich?`<dt>Stockwerk</dt><dd>${esc(nameVon(BEREICHE,m.bereich))}</dd>`:''}
       ${m.intern?`<dt>${m.art==='zaehler'?'Abgelesen':'Zeitpunkt'}</dt><dd>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</dd>`:''}
+      ${m.massnahme?`<dt>Massnahme</dt><dd>${massnahmeTag(m.massnahme)} ${esc(massnahmeName(m.massnahme))}</dd>`:''}
       ${m.paletten?`<dt>Bestellmenge</dt><dd><strong>${esc(palettenText(m.paletten))}</strong></dd>`:''}
       ${zaehlerListe(m).length?`<dt>Zählerstände</dt><dd>${zaehlerListe(m).map(z=>`<strong>${esc(zaehlerName(z.art))}</strong> ${esc(z.wert)} ${esc(z.einheit)}`).join('<br>')}</dd>`:''}
       <dt>Art</dt><dd>${esc(artVoll(m))}</dd>
@@ -1811,6 +1852,7 @@ async function zeigeRapport(nr){
         ${m.ort?`<tr><th>Bereich</th><td>${esc(ortText(m))}</td></tr>`:''}
         ${m.bereich?`<tr><th>Stockwerk</th><td>${esc(nameVon(BEREICHE,m.bereich))}</td></tr>`:''}
         ${m.unterart&&!za?`<tr><th>Art der Meldung</th><td>${esc(unterartText(m))}</td></tr>`:''}
+        ${m.massnahme?`<tr><th>Massnahme</th><td>${esc(massnahmeName(m.massnahme))}</td></tr>`:''}
         ${pk?`<tr><th>Auftrag erteilt von</th><td>${esc(m.pikett.auftraggeber||'—')}</td></tr>`:''}
         <tr><th>${za?'Abgelesen am':pk?'Einsatz am':'Festgestellt am'}</th><td>${za&&m.intern?`${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)} Uhr`:pk?datumIso(m.pikett.datum):datum(m.gemeldet)}</td></tr>
         <tr><th>Hauswart</th><td>${esc(m.hwName)}</td></tr>
