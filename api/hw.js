@@ -11,7 +11,7 @@ import { rpc, dbBereit } from '../lib/db.js';
 import { erstelleToken, pruefeToken, gleich } from '../lib/sitzung.js';
 import { uebersetzeTexte } from '../lib/uebersetzung.js';
 import { versendeMeldung } from '../lib/mailversand.js';
-import { bereinige, bereinigeFotos, mailDaten, deutschOk } from '../lib/meldung.js';
+import { bereinige, bereinigeFotos, mailDaten, deutschOk, istJahr } from '../lib/meldung.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
@@ -99,6 +99,8 @@ const AKTIONEN = {
     if (!istUuid(client_id)) throw new Fehler(400, 'client_id');
     const m = bereinige(meldung);
     const f = bereinigeFotos(fotos);
+    // Bei jährlichen Arbeiten ist das Foto der Nachweis für die Verwaltung
+    if (istJahr(m) && !f.length) throw new Fehler(400, 'e_jahr_foto');
     const daten = { ...m, pnr: h.pnr, hwName: hwName(h), mail: 'offen' };
     const r = await rpc('hw_meldung_neu', { p_client: client_id, p_pnr: h.pnr, p_objekt: m.objekt, p_art: m.art, p_daten: daten, p_fotos: f });
     if (!r.neu && r.meldung.mail === 'gesendet') return { meldung: r.meldung, doppelt: true };
