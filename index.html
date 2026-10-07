@@ -305,6 +305,8 @@ img.brand-logo{width:100%;max-width:168px}
 .sidebar-fuss button{background:none;border:0;color:#CFE6E6;font:inherit;font-size:11px;padding:8px 0 0;cursor:pointer;text-decoration:underline}
 .tag.pikett{background:var(--cs-warnung-hell);color:#8F6212}
 .tag.intern{background:#EEF2F2;color:var(--cs-text-weich)}
+.tag.jahr{background:#E8F1DC;color:#4C6B1F}
+.opt.pflicht-feld{color:var(--cs-negativ);font-weight:bold}
 .detail-kopf{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .zusammenfassung{display:grid;grid-template-columns:130px 1fr;gap:8px 16px;margin:0}
 .zusammenfassung dt{color:var(--cs-text-weich)}
@@ -455,10 +457,10 @@ img.brand-logo{width:100%;max-width:168px}
     <section class="hw-screen" data-screen="sWas">
       <div class="fortschritt"><div class="fortschritt-text"></div><div class="fortschritt-balken"></div></div>
       <h1 id="hw-was-titel"></h1>
-      <p class="lead" data-t="was_text"></p>
+      <p class="lead" data-t="was_text" id="hw-was-text"></p>
       <div class="kacheln zwei" id="hw-unterarten"></div>
       <div class="aufklappen" id="hw-unterart-andere-box" hidden>
-        <div class="feld-titel" data-t="unterart_andere"></div>
+        <div class="feld-titel" id="hw-unterart-andere-titel" data-t="unterart_andere"></div>
         <input class="gross-input" id="hw-unterart-andere" autocomplete="off" maxlength="80">
         <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
       </div>
@@ -525,7 +527,7 @@ img.brand-logo{width:100%;max-width:168px}
       <p class="lead" id="hw-s5-text"></p>
       <textarea class="gross-text" id="hw-text"></textarea>
       <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
-      <div class="feld-titel"><span data-t="fotos"></span> <span class="opt" data-t="optional"></span></div>
+      <div class="feld-titel"><span data-t="fotos"></span> <span class="opt" id="hw-fotos-opt" data-t="optional"></span></div>
       <div class="foto-knoepfe">
         <label class="foto-knopf"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l2-2h6l2 2h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><circle cx="12" cy="13" r="4"/></svg><span data-t="foto_knopf"></span><input type="file" id="hw-foto" accept="image/*" capture="environment"></label>
         <label class="foto-knopf zweit"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="M21 15l-5-5L5 21"/></svg><span data-t="foto_galerie"></span><input type="file" id="hw-foto-galerie" accept="image/*" multiple></label>
@@ -905,7 +907,13 @@ const UNTERARTEN = {
     {id:'garagenreinigung',n:{de:'Garagenreinigung',it:'Pulizia garage',pt:'Limpeza da garagem',es:'Limpieza del garaje'}},
     {id:'heizung',         n:{de:'Heizung',it:'Riscaldamento',pt:'Aquecimento',es:'Calefacción'}},
     {id:'rohrreinigung',   n:{de:'Rohrreinigung',it:'Pulizia tubature',pt:'Limpeza de canos',es:'Limpieza de tuberías'}},
-    {id:'andere',          n:{de:'Andere',it:'Altro',pt:'Outro',es:'Otro'}}]
+    {id:'andere',          n:{de:'Andere',it:'Altro',pt:'Outro',es:'Otro'}}],
+  jahr:[
+    {id:'schnitt', n:{de:'Schnittarbeiten',it:'Lavori di potatura',pt:'Trabalhos de poda',es:'Trabajos de poda'}},
+    {id:'fenster', n:{de:'Fensterreinigung',it:'Pulizia finestre',pt:'Limpeza de janelas',es:'Limpieza de ventanas'}},
+    {id:'garage',  n:{de:'Garagenreinigung',it:'Pulizia garage',pt:'Limpeza da garagem',es:'Limpieza del garaje'}},
+    {id:'heizung', n:{de:'Heizungsreinigung',it:'Pulizia riscaldamento',pt:'Limpeza do aquecimento',es:'Limpieza de la calefacción'}},
+    {id:'andere',  n:{de:'Andere Arbeit',it:'Altro lavoro',pt:'Outro trabalho',es:'Otro trabajo'}}]
 };
 /* Massnahme bei Meldungen an die Verwaltung: Techniker nötig oder bereits erledigt */
 const MASSNAHMEN = [
@@ -923,6 +931,9 @@ const massnahmeTag = id => { const m=massnahme(id); return m ? `<span class="tag
 /* Bestellungen: brauchen zusätzlich die Palettenmenge */
 const BESTELLUNGEN = ['regeneriersalz','streusalz'];
 const istBestellung = e => e.art==='intern' && BESTELLUNGEN.includes(e.unterart);
+/* Jährliche Arbeiten: Foto ist Pflicht (Nachweis), Bemerkung freiwillig, Massnahme automatisch «erledigt» */
+const istJahr = e => !!e && e.art==='jahr';
+const OHNE_TEXTPFLICHT = ['intern','zaehler','jahr'];
 const palettenText = n => `${String(n).replace('.', ',')} ${Number(String(n).replace(',','.'))===1?'Palette':'Paletten'}`;
 /* Zählerarten – aus dem bisherigen Beekeeper-Formular «Zählerstand» */
 const ZAEHLERARTEN = [
@@ -947,6 +958,10 @@ const ARTEN = [
    n:{de:'Zählerstände (Verwaltung)',it:'Letture contatori (amministrazione)',pt:'Leitura de contadores (administração)',es:'Lectura de contadores (administración)'},
    d:{de:'Öl, Wasser, Strom und Gas ablesen',it:'Leggere olio, acqua, luce e gas',pt:'Ler óleo, água, luz e gás',es:'Leer aceite, agua, luz y gas'},
    icon:'<circle cx="12" cy="13" r="8"/><path d="M12 13l4-3M12 5V3"/>'},
+  {id:'jahr', kurz:'Jährlich', tag:'jahr',
+   n:{de:'Jährliche Arbeiten (Verwaltung)',it:'Lavori annuali (amministrazione)',pt:'Trabalhos anuais (administração)',es:'Trabajos anuales (administración)'},
+   d:{de:'Ausgeführte Arbeit mit Fotos bestätigen',it:'Confermare con foto il lavoro eseguito',pt:'Confirmar com fotos o trabalho executado',es:'Confirmar con fotos el trabajo realizado'},
+   icon:'<path d="M20 11V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h9"/><path d="M8 12l3.5 3.5L21 6"/>'},
   {id:'intern', kurz:'Intern', tag:'intern',
    n:{de:'Meldung intern',it:'Segnalazione interna',pt:'Comunicação interna',es:'Aviso interno'},
    d:{de:'Erledigte Arbeiten und Infos für Clean Service',it:'Lavori svolti e info per Clean Service',pt:'Trabalhos feitos e info para a Clean Service',es:'Trabajos hechos e info para Clean Service'},
@@ -1018,6 +1033,8 @@ de:{login_titel:'Anmelden',login_text:'Bitte gib deine Personalnummer ein.',admi
   s3_titel:'Welches Stockwerk?',s3_text:'Tippe auf das Stockwerk oder den Aussenbereich.',unterart_titel_verwaltung:'Was ist los?',unterart_titel_intern:'Was für eine Information?',was_text:'Tippe auf das Passende.',i_wann:'Wann?',i_zeit:'Uhrzeit',einsatz_titel:'Dein Einsatz',einsatz_text:'Wer hat dich aufgeboten und wie lange warst du im Einsatz?',s5_titel_pikett:'Was hast du gemacht?',s5_titel_intern:'Bemerkung',s5_text_intern:'Freiwillig: Möchtest du noch etwas ergänzen?',f_was:'Was',f_zeit:'Zeitpunkt',f_bemerkung:'Bemerkung',e_zeit:'Bitte gib Datum und Uhrzeit an.',weitere_objekt:'Weitere Meldung zum gleichen Objekt',art_wechseln:'Art der Meldung ändern? Du beginnst dann auf der Startseite neu.',unterart_andere:'Was genau?',p_auftrag_ph:'z. B. Verwaltung Frau Müller',p_auftrag:'Von wem hast du den Auftrag erhalten?',e_unterart_verwaltung:'Bitte tippe auf die Art der Meldung.',e_unterart_intern:'Bitte tippe auf die Art der Information.',e_unterart_andere:'Bitte schreibe kurz, worum es geht.',e_auftrag:'Bitte gib an, von wem du den Auftrag erhalten hast.',
   s4_titel:'Art der Meldung',s4_text:'Tippe auf die passende Art.',
   pikett_titel:'Wann warst du im Einsatz?',p_datum:'Datum',p_von:'Von',p_bis:'Bis',heute:'Heute',gestern:'Gestern',p_dauer:'Einsatzdauer',
+  jahr_titel:'Welche Arbeit wurde ausgeführt?',jahr_text:'Tippe auf die Arbeit, die du erledigt hast.',jahr_arbeit:'Welche Arbeit genau?',f_arbeit:'Ausgeführte Arbeit',e_unterart_jahr:'Bitte tippe auf die ausgeführte Arbeit.',e_jahr_foto:'Bitte hänge mindestens ein Foto der ausgeführten Arbeit an – die Verwaltung erhält es als Nachweis.',pflicht:'(Pflicht)',s5_titel_jahr:'Fotos als Nachweis',s5_text_jahr:'Mindestens ein Foto der ausgeführten Arbeit. Eine Bemerkung ist freiwillig.',
+  text_ph_jahr:'z. B. Hecke geschnitten und Schnittgut entsorgt',
   s5_titel:'Was ist passiert?',sprache_hinweis:'Du kannst in deiner Sprache schreiben – wir übersetzen automatisch.',s5_text:'Beschreibe kurz: Was hast du festgestellt?',s5_text_pikett:'Beschreibe kurz: Was war los und was hast du gemacht?',text_ph:'z. B. Lampe im 2. OG brennt nicht',
   fotos:'Fotos',optional:'(freiwillig)',foto_knopf:'Foto aufnehmen',foto_galerie:'Aus Galerie',entwurf_titel:'Angefangene Meldung fortsetzen',
   s6_titel:'Alles richtig?',s6_text:'Prüfe deine Angaben und tippe auf «Senden».',senden:'Senden',aendern:'Ändern',
@@ -1038,6 +1055,8 @@ it:{login_titel:'Accedi',login_text:'Inserisci il tuo numero personale.',admin_l
   s3_titel:'Quale piano?',s3_text:'Tocca il piano o l’esterno.',unterart_titel_verwaltung:'Cosa succede?',unterart_titel_intern:'Che tipo di informazione?',was_text:'Tocca la voce giusta.',i_wann:'Quando?',i_zeit:'Ora',einsatz_titel:'Il tuo intervento',einsatz_text:'Chi ti ha chiamato e quanto è durato l’intervento?',s5_titel_pikett:'Cosa hai fatto?',s5_titel_intern:'Nota',s5_text_intern:'Facoltativo: vuoi aggiungere qualcosa?',f_was:'Cosa',f_zeit:'Momento',f_bemerkung:'Nota',e_zeit:'Indica data e ora.',weitere_objekt:'Altra segnalazione per lo stesso stabile',art_wechseln:'Cambiare il tipo di segnalazione? Ricominci dalla pagina iniziale.',unterart_andere:'Cosa esattamente?',p_auftrag_ph:'es. amministrazione, sig.ra Müller',p_auftrag:'Da chi hai ricevuto l’incarico?',e_unterart_verwaltung:'Tocca il tipo di segnalazione.',e_unterart_intern:'Tocca il tipo di informazione.',e_unterart_andere:'Scrivi brevemente di cosa si tratta.',e_auftrag:'Indica da chi hai ricevuto l’incarico.',
   s4_titel:'Tipo di segnalazione',s4_text:'Tocca il tipo corretto.',
   pikett_titel:'Quando sei intervenuto?',p_datum:'Data',p_von:'Da',p_bis:'A',heute:'Oggi',gestern:'Ieri',p_dauer:'Durata intervento',
+  jahr_titel:'Quale lavoro è stato eseguito?',jahr_text:'Tocca il lavoro che hai eseguito.',jahr_arbeit:'Quale lavoro esattamente?',f_arbeit:'Lavoro eseguito',e_unterart_jahr:'Tocca il lavoro eseguito.',e_jahr_foto:'Allega almeno una foto del lavoro eseguito – l’amministrazione la riceve come prova.',pflicht:'(obbligatorio)',s5_titel_jahr:'Foto come prova',s5_text_jahr:'Almeno una foto del lavoro eseguito. La nota è facoltativa.',
+  text_ph_jahr:'es. siepe potata e residui smaltiti',
   s5_titel:'Cosa è successo?',sprache_hinweis:'Puoi scrivere nella tua lingua – traduciamo automaticamente.',s5_text:'Descrivi brevemente cosa hai constatato.',s5_text_pikett:'Descrivi brevemente cosa è successo e cosa hai fatto.',text_ph:'es. la luce al 2° piano non funziona',
   fotos:'Foto',optional:'(facoltativo)',foto_knopf:'Scatta foto',foto_galerie:'Dalla galleria',entwurf_titel:'Continua la segnalazione iniziata',
   s6_titel:'Tutto corretto?',s6_text:'Controlla i dati e tocca «Invia».',senden:'Invia',aendern:'Modifica',
@@ -1058,6 +1077,8 @@ pt:{login_titel:'Entrar',login_text:'Introduz o teu número de pessoal.',admin_l
   s3_titel:'Que piso?',s3_text:'Toca no piso ou no exterior.',unterart_titel_verwaltung:'O que se passa?',unterart_titel_intern:'Que tipo de informação?',was_text:'Toca na opção certa.',i_wann:'Quando?',i_zeit:'Hora',einsatz_titel:'O teu serviço',einsatz_text:'Quem te chamou e quanto tempo durou o serviço?',s5_titel_pikett:'O que fizeste?',s5_titel_intern:'Observação',s5_text_intern:'Opcional: queres acrescentar algo?',f_was:'O quê',f_zeit:'Momento',f_bemerkung:'Observação',e_zeit:'Indica data e hora.',weitere_objekt:'Outra comunicação para o mesmo edifício',art_wechseln:'Mudar o tipo de comunicação? Recomeças na página inicial.',unterart_andere:'O quê exatamente?',p_auftrag_ph:'ex. administração, Sra. Müller',p_auftrag:'Quem te deu o pedido?',e_unterart_verwaltung:'Toca no tipo de comunicação.',e_unterart_intern:'Toca no tipo de informação.',e_unterart_andere:'Escreve brevemente do que se trata.',e_auftrag:'Indica quem te deu o pedido.',
   s4_titel:'Tipo de comunicação',s4_text:'Toca no tipo certo.',
   pikett_titel:'Quando estiveste em serviço?',p_datum:'Data',p_von:'De',p_bis:'Até',heute:'Hoje',gestern:'Ontem',p_dauer:'Duração',
+  jahr_titel:'Que trabalho foi executado?',jahr_text:'Toca no trabalho que executaste.',jahr_arbeit:'Que trabalho exatamente?',f_arbeit:'Trabalho executado',e_unterart_jahr:'Toca no trabalho executado.',e_jahr_foto:'Anexa pelo menos uma foto do trabalho executado – a administração recebe-a como prova.',pflicht:'(obrigatório)',s5_titel_jahr:'Fotos como prova',s5_text_jahr:'Pelo menos uma foto do trabalho executado. A observação é opcional.',
+  text_ph_jahr:'ex. sebe cortada e resíduos eliminados',
   s5_titel:'O que aconteceu?',sprache_hinweis:'Podes escrever na tua língua – traduzimos automaticamente.',s5_text:'Descreve brevemente o que verificaste.',s5_text_pikett:'Descreve brevemente o que aconteceu e o que fizeste.',text_ph:'ex. a luz no 2.º andar não funciona',
   fotos:'Fotos',optional:'(opcional)',foto_knopf:'Tirar foto',foto_galerie:'Da galeria',entwurf_titel:'Continuar a comunicação iniciada',
   s6_titel:'Está tudo certo?',s6_text:'Verifica os dados e toca em «Enviar».',senden:'Enviar',aendern:'Alterar',
@@ -1078,6 +1099,8 @@ es:{login_titel:'Entrar',login_text:'Introduce tu número de personal.',admin_li
   s3_titel:'¿Qué planta?',s3_text:'Toca la planta o el exterior.',unterart_titel_verwaltung:'¿Qué pasa?',unterart_titel_intern:'¿Qué tipo de información?',was_text:'Toca la opción correcta.',i_wann:'¿Cuándo?',i_zeit:'Hora',einsatz_titel:'Tu intervención',einsatz_text:'¿Quién te llamó y cuánto duró la intervención?',s5_titel_pikett:'¿Qué hiciste?',s5_titel_intern:'Observación',s5_text_intern:'Opcional: ¿quieres añadir algo?',f_was:'Qué',f_zeit:'Momento',f_bemerkung:'Observación',e_zeit:'Indica fecha y hora.',weitere_objekt:'Otro aviso para el mismo edificio',art_wechseln:'¿Cambiar el tipo de aviso? Empiezas de nuevo en la página inicial.',unterart_andere:'¿Qué exactamente?',p_auftrag_ph:'p. ej. administración, Sra. Müller',p_auftrag:'¿Quién te dio el encargo?',e_unterart_verwaltung:'Toca el tipo de aviso.',e_unterart_intern:'Toca el tipo de información.',e_unterart_andere:'Escribe brevemente de qué se trata.',e_auftrag:'Indica quién te dio el encargo.',
   s4_titel:'Tipo de aviso',s4_text:'Toca el tipo correcto.',
   pikett_titel:'¿Cuándo estuviste de guardia?',p_datum:'Fecha',p_von:'De',p_bis:'A',heute:'Hoy',gestern:'Ayer',p_dauer:'Duración',
+  jahr_titel:'¿Qué trabajo se ha realizado?',jahr_text:'Toca el trabajo que has realizado.',jahr_arbeit:'¿Qué trabajo exactamente?',f_arbeit:'Trabajo realizado',e_unterart_jahr:'Toca el trabajo realizado.',e_jahr_foto:'Adjunta al menos una foto del trabajo realizado – la administración la recibe como prueba.',pflicht:'(obligatorio)',s5_titel_jahr:'Fotos como prueba',s5_text_jahr:'Al menos una foto del trabajo realizado. La observación es opcional.',
+  text_ph_jahr:'p. ej. seto cortado y restos eliminados',
   s5_titel:'¿Qué ha pasado?',sprache_hinweis:'Puedes escribir en tu idioma – traducimos automáticamente.',s5_text:'Describe brevemente lo que has visto.',s5_text_pikett:'Describe brevemente qué pasó y qué hiciste.',text_ph:'p. ej. la luz del 2.º piso no funciona',
   fotos:'Fotos',optional:'(opcional)',foto_knopf:'Hacer foto',foto_galerie:'De la galería',entwurf_titel:'Continuar el aviso empezado',
   s6_titel:'¿Todo correcto?',s6_text:'Revisa los datos y toca «Enviar».',senden:'Enviar',aendern:'Cambiar',
@@ -1137,7 +1160,8 @@ const ABLAUF = {
   verwaltung:['s1','s2','sWas','sMassnahme','s5','s6'],     /* Objekt · Wo genau · Was ist los · Wer erledigt · Beschreibung · Prüfen */
   pikett:    ['s1','s2','sEinsatz','sMassnahme','s5','s6'], /* Objekt · Wo genau · Einsatz · Wer erledigt · Einsatzbeschrieb · Prüfen */
   intern:    ['s1','sWas','s5','s6'],          /* Objekt · Was & wann · Bemerkung · Prüfen */
-  zaehler:   ['s1','sZaehler','s5','s6']       /* Objekt · Zählerstände · Fotos & Bemerkung · Prüfen */
+  zaehler:   ['s1','sZaehler','s5','s6'],      /* Objekt · Zählerstände · Fotos & Bemerkung · Prüfen */
+  jahr:      ['s1','sWas','s5','s6']           /* Objekt · Welche Arbeit · Fotos als Nachweis · Prüfen */
 };
 const ablauf = () => ABLAUF[entwurf.art] || ABLAUF.verwaltung;
 const MIT_ORT = ['verwaltung','pikett'];   /* Arten mit Hausnummer, Bereich und Stockwerk */
@@ -1177,7 +1201,9 @@ function zeigeScreen(s, still){
   if(s==='sWas') renderUnterarten();
   if(s==='sZaehler') renderZaehler();
   if(s==='sMassnahme') renderMassnahmen();
-  if(s==='s5'){ const k={pikett:'_pikett',intern:'_intern',zaehler:'_zaehler'}[entwurf.art]||''; $('#hw-s5-titel').textContent=t('s5_titel'+k); $('#hw-s5-text').textContent=t('s5_text'+k); }
+  if(s==='s5'){ const k={pikett:'_pikett',intern:'_intern',zaehler:'_zaehler',jahr:'_jahr'}[entwurf.art]||''; $('#hw-s5-titel').textContent=t('s5_titel'+k); $('#hw-s5-text').textContent=t('s5_text'+k);
+    $('#hw-fotos-opt').textContent=t(istJahr(entwurf)?'pflicht':'optional'); $('#hw-fotos-opt').classList.toggle('pflicht-feld',istJahr(entwurf));
+    $('#hw-text').placeholder=t(istJahr(entwurf)?'text_ph_jahr':'text_ph'); }
   if(s==='s6') renderPruef();
   if(s==='meine'&&user) renderMeine();
   if(!still) window.scrollTo(0,0);
@@ -1210,6 +1236,10 @@ async function aktualisiereHw(){
   try{ const j=await api('stammdaten',{token:hwToken()}); user=j.hauswart; schreib('hw_user',JSON.stringify(user));
     setzeStammdaten({objekte:j.objekte}); schreib('hw_objekte',JSON.stringify(j.objekte)); renderObjektliste(); if(screen==='start') zeigeScreen('start',true); }
   catch(e){ if(e.status===401) abmeldenHw(); }
+}
+async function nacharbeitHw(){
+  if(!SERVER||!hwToken()) return;
+  try{ await api('nacharbeit',{token:hwToken()}); }catch(_){ }
 }
 async function ladeMeine(){
   if(!SERVER||!hwToken()) return;
@@ -1322,15 +1352,17 @@ $('#hw-start-arten').addEventListener('click',e=>{const b=e.target.closest('butt
 /* Was ist los? / Was für eine Information? (+ Wann bei intern) */
 function renderUnterarten(){
   const liste=UNTERARTEN[entwurf.art]||[];
-  $('#hw-was-titel').textContent=t(entwurf.art==='intern'?'unterart_titel_intern':'unterart_titel_verwaltung');
+  $('#hw-was-titel').textContent=t(istJahr(entwurf)?'jahr_titel':entwurf.art==='intern'?'unterart_titel_intern':'unterart_titel_verwaltung');
+  $('#hw-was-text').textContent=t(istJahr(entwurf)?'jahr_text':'was_text');
   $('#hw-unterarten').innerHTML=liste.map(u=>`<button type="button" class="kachel${entwurf.unterart===u.id?' gewaehlt':''}" data-v="${u.id}">${esc(u.n[L]||u.n.de)}</button>`).join('');
   $('#hw-unterart-andere-box').hidden = entwurf.unterart!=='andere';
+  $('#hw-unterart-andere-titel').textContent=t(istJahr(entwurf)?'jahr_arbeit':'unterart_andere');
   const best=istBestellung(entwurf); $('#hw-paletten-box').hidden = !best; if(!best) entwurf.paletten='';
   $('#hw-intern-wann').hidden = entwurf.art!=='intern';
 }
 $('#hw-unterarten').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.unterart=b.dataset.v; renderUnterarten(); fehlerHw('');
   if(entwurf.unterart==='andere') setTimeout(()=>{ $('#hw-unterart-andere-box').scrollIntoView({behavior:'smooth',block:'center'}); $('#hw-unterart-andere').focus(); },80);
-  else if(entwurf.art==='verwaltung') setTimeout(()=>zeigeScreen(naechster('sWas')),160); });
+  else if(entwurf.art==='verwaltung'||istJahr(entwurf)) setTimeout(()=>zeigeScreen(naechster('sWas')),160); });
 $('#hw-unterart-andere').addEventListener('input',e=>{ entwurf.unterartAndere=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
 $('#hw-p-auftrag').addEventListener('input',e=>{ entwurf.pikett.auftraggeber=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); });
 /* Datum und Zeit: eigene Auswahl im 24-Stunden-Format (unabhängig von der Handy-Einstellung) */
@@ -1378,12 +1410,13 @@ function renderPruef(){
   if(MIT_ORT.includes(a)){ h += z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2');
     if(entwurf.bereich) h += z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2'); }
   if(a==='verwaltung') h += z('f_was',ua,'sWas');
+  if(a==='jahr') h += z('f_arbeit',`<b>${ua}</b>`,'sWas');
   if(a==='intern') h += z('f_was',ua,'sWas') + (istBestellung(entwurf)?z('f_menge',esc(palettenText(entwurf.paletten)),'sWas'):'') + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sWas');
   if(a==='zaehler') h += z('f_zaehler',ZAEHLERARTEN.filter(x=>entwurf.zaehler[x.id]).map(x=>`<b>${esc(x.n[L]||x.n.de)}</b> ${esc(entwurf.zaehler[x.id].wert)} ${esc(entwurf.zaehler[x.id].einheit)}`).join('<br>'),'sZaehler')
     + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sZaehler');
   if(a==='pikett'){ const p=entwurf.pikett; h+=z('f_auftrag',esc(p.auftraggeber.trim()),'sEinsatz')+z('f_einsatz',`${datumIso(p.datum)}, ${esc(p.von)}–${esc(p.bis)}<br><b>${esc(dauerText(pikettMinuten(p),L))}</b>`,'sEinsatz'); }
   if(MIT_MASSNAHME.includes(a)) h += z('f_massnahme',`<b>${esc(massnahmeName(entwurf.massnahme,L))}</b>`,'sMassnahme');
-  h += z(['intern','zaehler'].includes(a)?'f_bemerkung':'f_text',esc(entwurf.text.trim())||'—','s5') + z('f_fotos',entwurf.fotos.length,'s5');
+  h += z(OHNE_TEXTPFLICHT.includes(a)?'f_bemerkung':'f_text',esc(entwurf.text.trim())||'—','s5') + z('f_fotos',entwurf.fotos.length,'s5');
   $('#hw-pruef').innerHTML=h;
 }
 $('#hw-pruef').addEventListener('click',e=>{const b=e.target.closest('.aendern'); if(!b) return;
@@ -1402,7 +1435,7 @@ function pruefeSchritt(s){
   }
   if(s==='sWas'){
     if(UNTERARTEN[entwurf.art]){
-      if(!entwurf.unterart) return entwurf.art==='intern'?'e_unterart_intern':'e_unterart_verwaltung';
+      if(!entwurf.unterart) return istJahr(entwurf)?'e_unterart_jahr':entwurf.art==='intern'?'e_unterart_intern':'e_unterart_verwaltung';
       if(entwurf.unterart==='andere'&&!entwurf.unterartAndere.trim()){ $('#hw-unterart-andere').classList.add('fehlerhaft'); $('#hw-unterart-andere').focus(); return 'e_unterart_andere'; }
     }
     if(istBestellung(entwurf)){
@@ -1426,7 +1459,8 @@ function pruefeSchritt(s){
       if(p.datum>isoTag(heute)) return 'e_pikett_zukunft';
       if(pikettMinuten(p)===0) return 'e_pikett_gleich'; }
   }
-  if(s==='s5'&&!['intern','zaehler'].includes(entwurf.art)&&entwurf.text.trim().length<3) return 'e_text';
+  if(s==='s5'&&!OHNE_TEXTPFLICHT.includes(entwurf.art)&&entwurf.text.trim().length<3) return 'e_text';
+  if(s==='s5'&&istJahr(entwurf)&&!entwurf.fotos.length) return 'e_jahr_foto';
   return '';
 }
 /* Live: Meldung geht an den Server (speichern, übersetzen, Mail + PDF). Ohne Netz wartet sie im Ausgang. */
@@ -1441,6 +1475,7 @@ async function sendeAuftrag(a){
   try{
     const j=await api('meldung_neu',{token:hwToken(),...a});
     ausgang.raus(a.client_id); const m=uebernimm(j.meldung);
+    if(m.uebersetzung==='ausstehend'||m.mail!=='gesendet') setTimeout(nacharbeitHw, 20000);
     if(okAuftrag===a.client_id && screen==='ok') zeigeOkNr(t('ok_nr',m.nr));
     if(screen==='start'||screen==='meine') zeigeScreen(screen,true);
     return true;
@@ -1460,8 +1495,10 @@ async function leereAusgang(){
 function sendenServer(){
   const intern=entwurf.art==='intern';
   const zaehler=entwurf.art==='zaehler';
+  const jahr=istJahr(entwurf);
   const meldung={objekt:entwurf.objekt, hausnr:entwurf.hausnr, ort:entwurf.ort, mieter:entwurf.mieter, andere:entwurf.andere, bereich:entwurf.bereich,
     intern:(intern||zaehler)?{...entwurf.intern}:null, art:entwurf.art, unterart:entwurf.unterart, unterartAndere:entwurf.unterartAndere,
+    /* bei jährlichen Arbeiten setzt der Server die Massnahme automatisch auf «Erledigt durch Hauswartung» */
     pikett:entwurf.art==='pikett'?{...entwurf.pikett}:null, massnahme:MIT_MASSNAHME.includes(entwurf.art)?entwurf.massnahme:null, text:entwurf.text, paletten:istBestellung(entwurf)?String(entwurf.paletten).replace(',','.'):null,
     zaehler:zaehler?ZAEHLERARTEN.filter(z=>entwurf.zaehler[z.id]).map(z=>({art:z.id, wert:String(entwurf.zaehler[z.id].wert).trim(), einheit:entwurf.zaehler[z.id].einheit})):null};
   const a={client_id:uuid(), meldung, fotos:[...entwurf.fotos], seit:Date.now()};
@@ -1472,13 +1509,14 @@ function sendenServer(){
 function senden(){
   if(SERVER) return sendenServer();
   const nr=Math.max(1000,...MELDUNGEN.map(m=>m.nr))+1;
-  const intern=entwurf.art==='intern'||entwurf.art==='zaehler';
+  const mitZeit=entwurf.art==='intern'||entwurf.art==='zaehler';
+  const intern=mitZeit||istJahr(entwurf);
   MELDUNGEN.push({nr, objekt:entwurf.objekt, hausnr:intern?'':entwurf.hausnr.trim(), ort:intern?null:entwurf.ort, mieter:!intern&&entwurf.ort==='mieter'?entwurf.mieter.trim():'', andere:!intern&&entwurf.ort==='andere'?entwurf.andere.trim():'',
-    bereich:intern?null:entwurf.bereich, intern:intern?{...entwurf.intern}:null,
+    bereich:intern?null:entwurf.bereich, intern:mitZeit?{...entwurf.intern}:null,
     zaehler:entwurf.art==='zaehler'?ZAEHLERARTEN.filter(z=>entwurf.zaehler[z.id]).map(z=>({art:z.id, wert:String(entwurf.zaehler[z.id].wert).trim(), einheit:entwurf.zaehler[z.id].einheit})):null,
     paletten:istBestellung(entwurf)?String(entwurf.paletten).replace(',','.'):null, art:entwurf.art, unterart:UNTERARTEN[entwurf.art]?entwurf.unterart:'', unterartAndere:entwurf.unterart==='andere'?entwurf.unterartAndere.trim():'', pikett:entwurf.art==='pikett'?{...entwurf.pikett,auftraggeber:entwurf.pikett.auftraggeber.trim()}:null, text:entwurf.text.trim(),
-    massnahme:MIT_MASSNAHME.includes(entwurf.art)?entwurf.massnahme:null,
-    status:(MIT_MASSNAHME.includes(entwurf.art)&&entwurf.massnahme==='erledigt')?'erledigt':'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
+    massnahme:istJahr(entwurf)?'erledigt':MIT_MASSNAHME.includes(entwurf.art)?entwurf.massnahme:null,
+    status:(istJahr(entwurf)||(MIT_MASSNAHME.includes(entwurf.art)&&entwurf.massnahme==='erledigt'))?'erledigt':'neu', gemeldet:new Date(), pnr:user.pnr, hwName:hwListe(user), fotos:[...entwurf.fotos]});
   loescheEntwurf(); $('#hw-ok-nr').textContent=t('ok_nr',nr); renderAdmin(); zeigeScreen('ok');
   const neu=MELDUNGEN.find(m=>m.nr===nr); uebersetzeVorVersand(neu).then(()=>sendeMail(neu));
 }
@@ -1626,6 +1664,7 @@ function mailHtml(m){
   if(m.mail==='wartet') return `<span class="tag warnung">Wird automatisch nachgesendet${m.mailNaechster?' um '+new Date(m.mailNaechster).toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'}):''}</span> <button type="button" class="btn secondary" id="modal-mail-neu" style="min-height:30px;margin-left:6px">Jetzt senden</button><br><span class="nr" style="font-size:11px">${esc(m.mailFehler||'')}</span>`;
   return `<span class="tag warnung">Noch nicht gesendet</span> <button type="button" class="btn secondary" id="modal-mail-neu" style="min-height:30px;margin-left:6px">Jetzt senden</button>`;
 }
+const istJahrM = m => !!m && m.art==='jahr';
 const textFuerVerwaltung = m => (m.uebersetzung==='ok'||m.uebersetzung==='manuell'||m.uebersetzung==='nicht_noetig') ? (m.textDe||m.text) : m.text;
 const brauchtUebersetzung = m => m.uebersetzung==='ausstehend'||m.uebersetzung==='laeuft';
 function uebersetzungTag(m){
@@ -1797,6 +1836,7 @@ function oeffne(nr){
       ${m.intern?`<dt>${m.art==='zaehler'?'Abgelesen':'Zeitpunkt'}</dt><dd>${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)}</dd>`:''}
       ${m.massnahme?`<dt>Massnahme</dt><dd>${massnahmeTag(m.massnahme)} ${esc(massnahmeName(m.massnahme))}</dd>`:''}
       ${m.paletten?`<dt>Bestellmenge</dt><dd><strong>${esc(palettenText(m.paletten))}</strong></dd>`:''}
+      ${istJahrM(m)?`<dt>Ausgeführte Arbeit</dt><dd><strong>${esc(unterartText(m))}</strong></dd><dt>Nachweis</dt><dd>${m.fotos.length||m.fotosAnzahl||0} Foto(s)</dd>`:''}
       ${zaehlerListe(m).length?`<dt>Zählerstände</dt><dd>${zaehlerListe(m).map(z=>`<strong>${esc(zaehlerName(z.art))}</strong> ${esc(z.wert)} ${esc(z.einheit)}`).join('<br>')}</dd>`:''}
       <dt>Art</dt><dd>${esc(artVoll(m))}</dd>
       ${m.pikett?`<dt>Auftrag von</dt><dd>${esc(m.pikett.auftraggeber||'—')}</dd><dt>Pikett</dt><dd>${datumIso(m.pikett.datum)}</dd>`:''}
@@ -1835,7 +1875,7 @@ $('#modal-rapport').addEventListener('click',()=>zeigeRapport(aktNr));
 /* ---------- Verwaltungsrapport (A4) ---------- */
 async function zeigeRapport(nr){
   const m=MELDUNGEN.find(x=>x.nr===nr); if(!m) return;
-  if(SERVER && m.fotosAnzahl && !m.fotosGeladen){ try{ const j=await api('meldung_holen',{token:adminToken(),nr}); m.fotos=j.meldung.fotos||[]; m.fotosGeladen=true; }catch(_){ } } const o=obj(m.objekt), pk=m.art==='pikett', za=m.art==='zaehler';
+  if(SERVER && m.fotosAnzahl && !m.fotosGeladen){ try{ const j=await api('meldung_holen',{token:adminToken(),nr}); m.fotos=j.meldung.fotos||[]; m.fotosGeladen=true; }catch(_){ } } const o=obj(m.objekt), pk=m.art==='pikett', za=m.art==='zaehler', ja=istJahrM(m);
   const e=pk?pikettMinuten(m.pikett):0, tot=e+ADMIN_MIN_PIKETT;
   $('#rapport-warnung').hidden=!brauchtUebersetzung(m);
   $('#rapport-a4').innerHTML=`
@@ -1844,25 +1884,26 @@ async function zeigeRapport(nr){
       <div class="a4-absender">Clean Service Scaramuzzo AG, Industriestrasse 5, 8307 Effretikon</div>
       <div class="a4-empfaenger"><b>${esc(o.kunde)}</b>${o.email?`<br>${esc(o.email)}`:''}</div>
       <div class="a4-datum">Effretikon, ${datum(new Date())}</div>
-      <div class="a4-betreff">${za?'Zählerstände':pk?'Rapport Pikettdienst':'Meldung Hauswartung'} · Nr. ${m.nr}</div>
+      <div class="a4-betreff">${ja?'Jährliche Arbeiten':za?'Zählerstände':pk?'Rapport Pikettdienst':'Meldung Hauswartung'} · Nr. ${m.nr}</div>
       <p>Sehr geehrte Damen und Herren</p>
-      <p>${za?'Gerne übermitteln wir Ihnen die aktuellen Zählerstände Ihrer Liegenschaft.':pk?'Gerne informieren wir Sie über den folgenden Pikett-Einsatz in Ihrer Liegenschaft.':'Gerne informieren wir Sie über die folgende Feststellung unserer Hauswartung in Ihrer Liegenschaft.'}</p>
+      <p>${ja?'Gerne bestätigen wir Ihnen, dass die folgenden jährlichen Arbeiten in Ihrer Liegenschaft ausgeführt wurden. Die Fotos der ausgeführten Arbeit finden Sie im Anhang.':za?'Gerne übermitteln wir Ihnen die aktuellen Zählerstände Ihrer Liegenschaft.':pk?'Gerne informieren wir Sie über den folgenden Pikett-Einsatz in Ihrer Liegenschaft.':'Gerne informieren wir Sie über die folgende Feststellung unserer Hauswartung in Ihrer Liegenschaft.'}</p>
       <table>
         <tr><th>Objekt</th><td>${esc(o.strasse)}${m.hausnr?', Hausnummer '+esc(m.hausnr):''}, ${esc(o.ort)} <span style="color:#555">(Obj. ${esc(m.objekt)})</span></td></tr>
         ${m.ort?`<tr><th>Bereich</th><td>${esc(ortText(m))}</td></tr>`:''}
         ${m.bereich?`<tr><th>Stockwerk</th><td>${esc(nameVon(BEREICHE,m.bereich))}</td></tr>`:''}
-        ${m.unterart&&!za?`<tr><th>Art der Meldung</th><td>${esc(unterartText(m))}</td></tr>`:''}
-        ${m.massnahme?`<tr><th>Massnahme</th><td>${esc(massnahmeName(m.massnahme))}</td></tr>`:''}
+        ${m.unterart&&!za?`<tr><th>${ja?'Ausgeführte Arbeit':'Art der Meldung'}</th><td>${esc(unterartText(m))}</td></tr>`:''}
+        ${m.massnahme&&!ja?`<tr><th>Massnahme</th><td>${esc(massnahmeName(m.massnahme))}</td></tr>`:''}
         ${pk?`<tr><th>Auftrag erteilt von</th><td>${esc(m.pikett.auftraggeber||'—')}</td></tr>`:''}
-        <tr><th>${za?'Abgelesen am':pk?'Einsatz am':'Festgestellt am'}</th><td>${za&&m.intern?`${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)} Uhr`:pk?datumIso(m.pikett.datum):datum(m.gemeldet)}</td></tr>
+        <tr><th>${za?'Abgelesen am':pk?'Einsatz am':ja?'Ausgeführt am':'Festgestellt am'}</th><td>${za&&m.intern?`${datumIso(m.intern.datum)}, ${esc(m.intern.zeit)} Uhr`:pk?datumIso(m.pikett.datum):datum(m.gemeldet)}</td></tr>
         <tr><th>Hauswart</th><td>${esc(m.hwName)}</td></tr>
       </table>
       ${za?`<div class="a4-block"><h3>Abgelesene Zählerstände</h3><table class="a4-aufwand">${zaehlerListe(m).map(z=>`<tr><th>${esc(zaehlerName(z.art))}</th><td>${esc(z.wert)} ${esc(z.einheit)}</td></tr>`).join('')}</table></div>`:''}
-      ${!za||textFuerVerwaltung(m).trim()?`<div class="a4-block"><h3>${pk?'Einsatzbeschrieb':za?'Bemerkung':'Beschreibung'}</h3><p>${esc(textFuerVerwaltung(m))}</p></div>`:''}
+      ${!(za||ja)||textFuerVerwaltung(m).trim()?`<div class="a4-block"><h3>${pk?'Einsatzbeschrieb':(za||ja)?'Bemerkung':'Beschreibung'}</h3><p>${esc(textFuerVerwaltung(m))}</p></div>`:''}
       ${pk?`<div class="a4-block"><h3>Aufwand</h3><table class="a4-aufwand">
         <tr><th>Einsatz ${datumIso(m.pikett.datum)}, ${esc(m.pikett.von)} – ${esc(m.pikett.bis)} Uhr</th><td>${hhmm(e)} h</td></tr>
         ${MIT_ADMIN?`<tr><th>Administrativer Aufwand</th><td>${hhmm(ADMIN_MIN_PIKETT)} h</td></tr>`:''}
         <tr class="total"><th>Total verrechenbar</th><td>${hhmm(tot)} h (${dezStd(tot)} Std.)</td></tr></table></div>`:''}
+      ${ja?`<div class="a4-block"><h3>Nachweis</h3><p>${m.fotos.length||m.fotosAnzahl||0} Foto${(m.fotos.length||m.fotosAnzahl||0)===1?'':'s'} der ausgeführten Arbeit${m.fotos.length?'':' (im Anhang der Mail)'}.</p></div>`:''}
       ${m.fotos.length?`<div class="a4-fotos">${m.fotos.slice(0,5).map(f=>`<img src="${f}" alt="">`).join('')}</div>`:''}
       <div class="a4-gruss">Freundliche Grüsse<br><br>Clean Service Scaramuzzo AG<br><span class="klein">Hauswartung</span></div>
     </div>`;
@@ -2051,7 +2092,7 @@ uebersetze(); ausVerlauf=true; zeigeScreen(screen); ausVerlauf=false; route();
   if(live===false && SERVER){ schreib('hw_server',null); location.reload(); return; }
   if(!SERVER) return;
   $$('.hilfe').forEach(e=>{ if(e.textContent.startsWith('Demo-Code')) e.remove(); });
-  if(user){ aktualisiereHw(); ladeMeine(); leereAusgang(); }
+  if(user){ aktualisiereHw(); ladeMeine(); leereAusgang(); nacharbeitHw(); }
 })();
 window.addEventListener('online',()=>{ if(SERVER){ leereAusgang(); nacharbeitAdmin(); } });
 document.addEventListener('visibilitychange',()=>{ if(SERVER&&!document.hidden&&user){ leereAusgang(); } });
