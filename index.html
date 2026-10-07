@@ -307,6 +307,8 @@ img.brand-logo{width:100%;max-width:168px}
 .tag.intern{background:#EEF2F2;color:var(--cs-text-weich)}
 .tag.jahr{background:#E8F1DC;color:#4C6B1F}
 .opt.pflicht-feld{color:var(--cs-negativ);font-weight:bold}
+.jahr-titel{margin-top:26px;padding-top:20px;border-top:1px solid var(--cs-rahmen)}
+.jahr-hinweis{margin:-6px 0 10px;font-size:13px;color:var(--cs-text-weich);line-height:1.5}
 .detail-kopf{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
 .zusammenfassung{display:grid;grid-template-columns:130px 1fr;gap:8px 16px;margin:0}
 .zusammenfassung dt{color:var(--cs-text-weich)}
@@ -450,6 +452,16 @@ img.brand-logo{width:100%;max-width:168px}
       <div class="aufklappen" id="hw-stockwerk-box" hidden>
         <div class="feld-titel" data-t="stockwerk_titel"></div>
         <div class="kacheln drei" id="hw-bereiche"></div>
+      </div>
+      <div id="hw-jahr-block" hidden>
+        <div class="feld-titel jahr-titel" data-t="jahr_titel_feld"></div>
+        <p class="jahr-hinweis" data-t="jahr_hinweis"></p>
+        <div class="kacheln zwei" id="hw-jahr-arbeiten"></div>
+        <div class="aufklappen" id="hw-jahr-andere-box" hidden>
+          <div class="feld-titel" data-t="jahr_arbeit"></div>
+          <input class="gross-input" id="hw-jahr-andere" autocomplete="off" maxlength="80">
+          <div class="sprach-hinweis"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span data-t="sprache_hinweis"></span></div>
+        </div>
       </div>
     </section>
 
@@ -1033,6 +1045,7 @@ de:{login_titel:'Anmelden',login_text:'Bitte gib deine Personalnummer ein.',admi
   s3_titel:'Welches Stockwerk?',s3_text:'Tippe auf das Stockwerk oder den Aussenbereich.',unterart_titel_verwaltung:'Was ist los?',unterart_titel_intern:'Was für eine Information?',was_text:'Tippe auf das Passende.',i_wann:'Wann?',i_zeit:'Uhrzeit',einsatz_titel:'Dein Einsatz',einsatz_text:'Wer hat dich aufgeboten und wie lange warst du im Einsatz?',s5_titel_pikett:'Was hast du gemacht?',s5_titel_intern:'Bemerkung',s5_text_intern:'Freiwillig: Möchtest du noch etwas ergänzen?',f_was:'Was',f_zeit:'Zeitpunkt',f_bemerkung:'Bemerkung',e_zeit:'Bitte gib Datum und Uhrzeit an.',weitere_objekt:'Weitere Meldung zum gleichen Objekt',art_wechseln:'Art der Meldung ändern? Du beginnst dann auf der Startseite neu.',unterart_andere:'Was genau?',p_auftrag_ph:'z. B. Verwaltung Frau Müller',p_auftrag:'Von wem hast du den Auftrag erhalten?',e_unterart_verwaltung:'Bitte tippe auf die Art der Meldung.',e_unterart_intern:'Bitte tippe auf die Art der Information.',e_unterart_andere:'Bitte schreibe kurz, worum es geht.',e_auftrag:'Bitte gib an, von wem du den Auftrag erhalten hast.',
   s4_titel:'Art der Meldung',s4_text:'Tippe auf die passende Art.',
   pikett_titel:'Wann warst du im Einsatz?',p_datum:'Datum',p_von:'Von',p_bis:'Bis',heute:'Heute',gestern:'Gestern',p_dauer:'Einsatzdauer',
+  jahr_titel_feld:'Jährliche Arbeiten',jahr_hinweis:'Wurde eine jährliche Arbeit ausgeführt? Tippe sie an – die Verwaltung erhält eine Bestätigung mit deinen Fotos.',
   jahr_titel:'Welche Arbeit wurde ausgeführt?',jahr_text:'Tippe auf die Arbeit, die du erledigt hast.',jahr_arbeit:'Welche Arbeit genau?',f_arbeit:'Ausgeführte Arbeit',e_unterart_jahr:'Bitte tippe auf die ausgeführte Arbeit.',e_jahr_foto:'Bitte hänge mindestens ein Foto der ausgeführten Arbeit an – die Verwaltung erhält es als Nachweis.',pflicht:'(Pflicht)',s5_titel_jahr:'Fotos als Nachweis',s5_text_jahr:'Mindestens ein Foto der ausgeführten Arbeit. Eine Bemerkung ist freiwillig.',
   text_ph_jahr:'z. B. Hecke geschnitten und Schnittgut entsorgt',
   s5_titel:'Was ist passiert?',sprache_hinweis:'Du kannst in deiner Sprache schreiben – wir übersetzen automatisch.',s5_text:'Beschreibe kurz: Was hast du festgestellt?',s5_text_pikett:'Beschreibe kurz: Was war los und was hast du gemacht?',text_ph:'z. B. Lampe im 2. OG brennt nicht',
@@ -1055,6 +1068,7 @@ it:{login_titel:'Accedi',login_text:'Inserisci il tuo numero personale.',admin_l
   s3_titel:'Quale piano?',s3_text:'Tocca il piano o l’esterno.',unterart_titel_verwaltung:'Cosa succede?',unterart_titel_intern:'Che tipo di informazione?',was_text:'Tocca la voce giusta.',i_wann:'Quando?',i_zeit:'Ora',einsatz_titel:'Il tuo intervento',einsatz_text:'Chi ti ha chiamato e quanto è durato l’intervento?',s5_titel_pikett:'Cosa hai fatto?',s5_titel_intern:'Nota',s5_text_intern:'Facoltativo: vuoi aggiungere qualcosa?',f_was:'Cosa',f_zeit:'Momento',f_bemerkung:'Nota',e_zeit:'Indica data e ora.',weitere_objekt:'Altra segnalazione per lo stesso stabile',art_wechseln:'Cambiare il tipo di segnalazione? Ricominci dalla pagina iniziale.',unterart_andere:'Cosa esattamente?',p_auftrag_ph:'es. amministrazione, sig.ra Müller',p_auftrag:'Da chi hai ricevuto l’incarico?',e_unterart_verwaltung:'Tocca il tipo di segnalazione.',e_unterart_intern:'Tocca il tipo di informazione.',e_unterart_andere:'Scrivi brevemente di cosa si tratta.',e_auftrag:'Indica da chi hai ricevuto l’incarico.',
   s4_titel:'Tipo di segnalazione',s4_text:'Tocca il tipo corretto.',
   pikett_titel:'Quando sei intervenuto?',p_datum:'Data',p_von:'Da',p_bis:'A',heute:'Oggi',gestern:'Ieri',p_dauer:'Durata intervento',
+  jahr_titel_feld:'Lavori annuali',jahr_hinweis:'Hai eseguito un lavoro annuale? Toccalo – l’amministrazione riceve una conferma con le tue foto.',
   jahr_titel:'Quale lavoro è stato eseguito?',jahr_text:'Tocca il lavoro che hai eseguito.',jahr_arbeit:'Quale lavoro esattamente?',f_arbeit:'Lavoro eseguito',e_unterart_jahr:'Tocca il lavoro eseguito.',e_jahr_foto:'Allega almeno una foto del lavoro eseguito – l’amministrazione la riceve come prova.',pflicht:'(obbligatorio)',s5_titel_jahr:'Foto come prova',s5_text_jahr:'Almeno una foto del lavoro eseguito. La nota è facoltativa.',
   text_ph_jahr:'es. siepe potata e residui smaltiti',
   s5_titel:'Cosa è successo?',sprache_hinweis:'Puoi scrivere nella tua lingua – traduciamo automaticamente.',s5_text:'Descrivi brevemente cosa hai constatato.',s5_text_pikett:'Descrivi brevemente cosa è successo e cosa hai fatto.',text_ph:'es. la luce al 2° piano non funziona',
@@ -1077,6 +1091,7 @@ pt:{login_titel:'Entrar',login_text:'Introduz o teu número de pessoal.',admin_l
   s3_titel:'Que piso?',s3_text:'Toca no piso ou no exterior.',unterart_titel_verwaltung:'O que se passa?',unterart_titel_intern:'Que tipo de informação?',was_text:'Toca na opção certa.',i_wann:'Quando?',i_zeit:'Hora',einsatz_titel:'O teu serviço',einsatz_text:'Quem te chamou e quanto tempo durou o serviço?',s5_titel_pikett:'O que fizeste?',s5_titel_intern:'Observação',s5_text_intern:'Opcional: queres acrescentar algo?',f_was:'O quê',f_zeit:'Momento',f_bemerkung:'Observação',e_zeit:'Indica data e hora.',weitere_objekt:'Outra comunicação para o mesmo edifício',art_wechseln:'Mudar o tipo de comunicação? Recomeças na página inicial.',unterart_andere:'O quê exatamente?',p_auftrag_ph:'ex. administração, Sra. Müller',p_auftrag:'Quem te deu o pedido?',e_unterart_verwaltung:'Toca no tipo de comunicação.',e_unterart_intern:'Toca no tipo de informação.',e_unterart_andere:'Escreve brevemente do que se trata.',e_auftrag:'Indica quem te deu o pedido.',
   s4_titel:'Tipo de comunicação',s4_text:'Toca no tipo certo.',
   pikett_titel:'Quando estiveste em serviço?',p_datum:'Data',p_von:'De',p_bis:'Até',heute:'Hoje',gestern:'Ontem',p_dauer:'Duração',
+  jahr_titel_feld:'Trabalhos anuais',jahr_hinweis:'Executaste um trabalho anual? Toca nele – a administração recebe uma confirmação com as tuas fotos.',
   jahr_titel:'Que trabalho foi executado?',jahr_text:'Toca no trabalho que executaste.',jahr_arbeit:'Que trabalho exatamente?',f_arbeit:'Trabalho executado',e_unterart_jahr:'Toca no trabalho executado.',e_jahr_foto:'Anexa pelo menos uma foto do trabalho executado – a administração recebe-a como prova.',pflicht:'(obrigatório)',s5_titel_jahr:'Fotos como prova',s5_text_jahr:'Pelo menos uma foto do trabalho executado. A observação é opcional.',
   text_ph_jahr:'ex. sebe cortada e resíduos eliminados',
   s5_titel:'O que aconteceu?',sprache_hinweis:'Podes escrever na tua língua – traduzimos automaticamente.',s5_text:'Descreve brevemente o que verificaste.',s5_text_pikett:'Descreve brevemente o que aconteceu e o que fizeste.',text_ph:'ex. a luz no 2.º andar não funciona',
@@ -1099,6 +1114,7 @@ es:{login_titel:'Entrar',login_text:'Introduce tu número de personal.',admin_li
   s3_titel:'¿Qué planta?',s3_text:'Toca la planta o el exterior.',unterart_titel_verwaltung:'¿Qué pasa?',unterart_titel_intern:'¿Qué tipo de información?',was_text:'Toca la opción correcta.',i_wann:'¿Cuándo?',i_zeit:'Hora',einsatz_titel:'Tu intervención',einsatz_text:'¿Quién te llamó y cuánto duró la intervención?',s5_titel_pikett:'¿Qué hiciste?',s5_titel_intern:'Observación',s5_text_intern:'Opcional: ¿quieres añadir algo?',f_was:'Qué',f_zeit:'Momento',f_bemerkung:'Observación',e_zeit:'Indica fecha y hora.',weitere_objekt:'Otro aviso para el mismo edificio',art_wechseln:'¿Cambiar el tipo de aviso? Empiezas de nuevo en la página inicial.',unterart_andere:'¿Qué exactamente?',p_auftrag_ph:'p. ej. administración, Sra. Müller',p_auftrag:'¿Quién te dio el encargo?',e_unterart_verwaltung:'Toca el tipo de aviso.',e_unterart_intern:'Toca el tipo de información.',e_unterart_andere:'Escribe brevemente de qué se trata.',e_auftrag:'Indica quién te dio el encargo.',
   s4_titel:'Tipo de aviso',s4_text:'Toca el tipo correcto.',
   pikett_titel:'¿Cuándo estuviste de guardia?',p_datum:'Fecha',p_von:'De',p_bis:'A',heute:'Hoy',gestern:'Ayer',p_dauer:'Duración',
+  jahr_titel_feld:'Trabajos anuales',jahr_hinweis:'¿Has realizado un trabajo anual? Tócalo – la administración recibe una confirmación con tus fotos.',
   jahr_titel:'¿Qué trabajo se ha realizado?',jahr_text:'Toca el trabajo que has realizado.',jahr_arbeit:'¿Qué trabajo exactamente?',f_arbeit:'Trabajo realizado',e_unterart_jahr:'Toca el trabajo realizado.',e_jahr_foto:'Adjunta al menos una foto del trabajo realizado – la administración la recibe como prueba.',pflicht:'(obligatorio)',s5_titel_jahr:'Fotos como prueba',s5_text_jahr:'Al menos una foto del trabajo realizado. La observación es opcional.',
   text_ph_jahr:'p. ej. seto cortado y restos eliminados',
   s5_titel:'¿Qué ha pasado?',sprache_hinweis:'Puedes escribir en tu idioma – traducimos automáticamente.',s5_text:'Describe brevemente lo que has visto.',s5_text_pikett:'Describe brevemente qué pasó y qué hiciste.',text_ph:'p. ej. la luz del 2.º piso no funciona',
@@ -1161,7 +1177,7 @@ const ABLAUF = {
   pikett:    ['s1','s2','sEinsatz','sMassnahme','s5','s6'], /* Objekt · Wo genau · Einsatz · Wer erledigt · Einsatzbeschrieb · Prüfen */
   intern:    ['s1','sWas','s5','s6'],          /* Objekt · Was & wann · Bemerkung · Prüfen */
   zaehler:   ['s1','sZaehler','s5','s6'],      /* Objekt · Zählerstände · Fotos & Bemerkung · Prüfen */
-  jahr:      ['s1','sWas','s5','s6']           /* Objekt · Welche Arbeit · Fotos als Nachweis · Prüfen */
+  jahr:      ['s1','s2','s5','s6']             /* Objekt · Wo genau / Arbeit · Fotos als Nachweis · Prüfen */
 };
 const ablauf = () => ABLAUF[entwurf.art] || ABLAUF.verwaltung;
 const MIT_ORT = ['verwaltung','pikett'];   /* Arten mit Hausnummer, Bereich und Stockwerk */
@@ -1176,7 +1192,7 @@ function uebersetze(){
   $('#sprache').value=L;
   $('#hw-pnr').placeholder='00000'; $('#hw-objekt-suche').placeholder=t('suche');
   $('#hw-hausnr').placeholder=t('hausnr_ph'); $('#hw-mieter').placeholder=t('mieter_ph'); $('#hw-p-auftrag').placeholder=t('p_auftrag_ph'); $('#hw-andere').placeholder=t('andere_ph'); $('#hw-text').placeholder=t('text_ph');
-  renderObjektliste(); renderOrte(); renderBereiche(); renderArten(); fuelleZeitauswahl(); renderDauer(); zeigeScreen(screen,true);
+  renderObjektliste(); renderOrte(); renderBereiche(); renderArten(); renderJahrArbeiten(); fuelleZeitauswahl(); renderDauer(); zeigeScreen(screen,true);
 }
 $('#sprache').addEventListener('change',e=>{ L=e.target.value; try{localStorage.setItem('hw_lang',L)}catch(_){ } uebersetze(); });
 function fehlerHw(k){ const b=$('#hw-fehler'); b.hidden=!k; b.textContent=k?t(k):''; }
@@ -1198,6 +1214,7 @@ function zeigeScreen(s, still){
   if(SCHRITTE_MIT_ENTWURF.includes(s)) speichereEntwurf();
   if(s==='start'&&user){ zeigeEntwurfKarte(); $('#hw-hallo').textContent=`${t('hallo')} ${user.vorname}`; $('#hw-meine-zahl').textContent=MELDUNGEN.filter(m=>m.pnr===user.pnr&&offen(m)).length; }
   if(s==='s2'&&entwurf.objekt){ const o=obj(entwurf.objekt); $('#hw-objekt-info').innerHTML=`<svg viewBox="0 0 24 24"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6"/></svg><div><strong>${esc(o.strasse)}</strong>${esc(o.ort)} · ${esc(o.kunde)}</div>`; }
+  if(s==='s2') renderJahrArbeiten();
   if(s==='sWas') renderUnterarten();
   if(s==='sZaehler') renderZaehler();
   if(s==='sMassnahme') renderMassnahmen();
@@ -1260,13 +1277,13 @@ function zeigeEntwurfKarte(){ const d=ladeEntwurf(); $('#hw-entwurf').hidden=!d;
 $('#hw-entwurf').addEventListener('click',e=>{ if(e.target.closest('#hw-entwurf-weg')){ loescheEntwurf(); zeigeEntwurfKarte(); return; }
   const d=ladeEntwurf(); if(!d) return; entwurf=Object.assign(leererEntwurf(d.entwurf.art),d.entwurf);
   $('#hw-hausnr').value=entwurf.hausnr; $('#hw-mieter').value=entwurf.mieter; $('#hw-andere').value=entwurf.andere; $('#hw-paletten').value=entwurf.paletten||''; $('#hw-unterart-andere').value=entwurf.unterartAndere; $('#hw-p-auftrag').value=entwurf.pikett.auftraggeber; $('#hw-text').value=entwurf.text;
-  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderZaehler(); renderFotos(); renderDauer();
+  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderJahrArbeiten(); renderZaehler(); renderFotos(); renderDauer();
   zeigeScreen(SCHRITTE_MIT_ENTWURF.includes(d.screen)?d.screen:'s1'); });
 function neueMeldung(art, objekt){
   loescheEntwurf();
   entwurf=leererEntwurf(art||'verwaltung');
-  ['#hw-objekt-suche','#hw-hausnr','#hw-mieter','#hw-andere','#hw-paletten','#hw-unterart-andere','#hw-p-auftrag','#hw-text'].forEach(s=>{ $(s).value=''; $(s).classList.remove('fehlerhaft'); });
-  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderZaehler(); renderFotos(); renderDauer();
+  ['#hw-objekt-suche','#hw-hausnr','#hw-mieter','#hw-andere','#hw-paletten','#hw-unterart-andere','#hw-jahr-andere','#hw-p-auftrag','#hw-text'].forEach(s=>{ $(s).value=''; $(s).classList.remove('fehlerhaft'); });
+  fuelleZeitauswahl(); renderObjektliste(); renderOrte(); renderBereiche(); renderUnterarten(); renderJahrArbeiten(); renderZaehler(); renderFotos(); renderDauer();
   if(objekt){ entwurf.objekt=objekt; renderObjektliste(); zeigeScreen(naechster('s1')); } else zeigeScreen('s1');
 }
 const naechster = s => ablauf()[ablauf().indexOf(s)+1];
@@ -1293,7 +1310,7 @@ $('#hw-hausnr').addEventListener('input',e=>{ entwurf.hausnr=e.target.value; e.t
 function renderOrte(){ $('#hw-orte').innerHTML=ORTE.map(o=>`<button type="button" class="kachel${entwurf.ort===o.id?' gewaehlt':''}" data-v="${o.id}">${esc(o.n[L]||o.n.de)}</button>`).join(''); $('#hw-mieter-box').hidden = entwurf.ort!=='mieter'; $('#hw-andere-box').hidden = entwurf.ort!=='andere';
   const mit=brauchtStockwerk(entwurf); $('#hw-stockwerk-box').hidden = !mit;
   if(!mit && entwurf.bereich){ entwurf.bereich=null; renderBereiche(); } }
-$('#hw-orte').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.ort=b.dataset.v; renderOrte(); fehlerHw('');
+$('#hw-orte').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; entwurf.ort=b.dataset.v; zurueckZuMeldung(); renderOrte(); fehlerHw('');
   const box={mieter:'mieter',andere:'andere'}[entwurf.ort];
   if(box) setTimeout(()=>{ $(`#hw-${box}-box`).scrollIntoView({behavior:'smooth',block:'center'}); $(`#hw-${box}`).focus(); },80);
   else if(brauchtStockwerk(entwurf)) setTimeout(()=>$('#hw-stockwerk-box').scrollIntoView({behavior:'smooth',block:'center'}),80); });
@@ -1345,9 +1362,30 @@ $('#hw-z-datum').addEventListener('change',e=>{ entwurf.intern.datum=e.target.va
 /* Startseite: Art der Meldung wählen */
 function renderArten(){ renderStartArten(); renderUnterarten(); }
 function renderStartArten(){
-  $('#hw-start-arten').innerHTML=ARTEN.map(a=>`<button type="button" class="kachel art ${a.tag}" data-v="${a.id}"><span class="art-icon"><svg viewBox="0 0 24 24">${a.icon}</svg></span><span>${esc(a.n[L]||a.n.de)}<small>${esc(a.d[L]||a.d.de)}</small></span><svg class="pfeil" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`).join('');
+  $('#hw-start-arten').innerHTML=ARTEN.filter(a=>a.id!=='jahr').map(a=>`<button type="button" class="kachel art ${a.tag}" data-v="${a.id}"><span class="art-icon"><svg viewBox="0 0 24 24">${a.icon}</svg></span><span>${esc(a.n[L]||a.n.de)}<small>${esc(a.d[L]||a.d.de)}</small></span><svg class="pfeil" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>`).join('');
 }
 $('#hw-start-arten').addEventListener('click',e=>{const b=e.target.closest('button'); if(b) neueMeldung(b.dataset.v);});
+
+/* Jährliche Arbeiten: unten auf dem Schritt «Wo genau?», Alternative zur Bereich-Auswahl */
+function renderJahrArbeiten(){
+  const zeigen = entwurf.art==='verwaltung' || istJahr(entwurf);
+  $('#hw-jahr-block').hidden = !zeigen;
+  if(!zeigen) return;
+  $('#hw-jahr-arbeiten').innerHTML=(UNTERARTEN.jahr||[]).map(u=>`<button type="button" class="kachel${istJahr(entwurf)&&entwurf.unterart===u.id?' gewaehlt':''}" data-v="${u.id}">${esc(u.n[L]||u.n.de)}</button>`).join('');
+  $('#hw-jahr-andere-box').hidden = !(istJahr(entwurf)&&entwurf.unterart==='andere');
+  $('#hw-jahr-andere').value=istJahr(entwurf)?entwurf.unterartAndere:'';
+}
+$('#hw-jahr-arbeiten').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return;
+  entwurf.art='jahr'; entwurf.unterart=b.dataset.v;
+  entwurf.ort=null; entwurf.mieter=''; entwurf.andere=''; entwurf.bereich=null; entwurf.massnahme=null;
+  $('#hw-mieter').value=''; $('#hw-andere').value='';
+  renderOrte(); renderBereiche(); renderJahrArbeiten(); fehlerHw(''); speichereEntwurf();
+  if(entwurf.unterart==='andere'){ setTimeout(()=>{ $('#hw-jahr-andere-box').scrollIntoView({behavior:'smooth',block:'center'}); $('#hw-jahr-andere').focus(); },80); }
+  else setTimeout(()=>zeigeScreen(naechster('s2')),160); });
+$('#hw-jahr-andere').addEventListener('input',e=>{ entwurf.unterartAndere=e.target.value; e.target.classList.remove('fehlerhaft'); fehlerHw(''); speichereEntwurf(); });
+/* zurück zur gewöhnlichen Meldung, sobald wieder ein Bereich gewählt wird */
+function zurueckZuMeldung(){ if(!istJahr(entwurf)) return; entwurf.art='verwaltung'; entwurf.unterart=null; entwurf.unterartAndere='';
+  renderJahrArbeiten(); if(screen==='s2') zeigeScreen('s2',true); }
 
 /* Was ist los? / Was für eine Information? (+ Wann bei intern) */
 function renderUnterarten(){
@@ -1410,7 +1448,7 @@ function renderPruef(){
   if(MIT_ORT.includes(a)){ h += z('f_ort',esc(ortText({ort:entwurf.ort,mieter:entwurf.mieter.trim(),andere:entwurf.andere.trim()},L)),'s2');
     if(entwurf.bereich) h += z('f_bereich',esc(nameVon(BEREICHE,entwurf.bereich,L)),'s2'); }
   if(a==='verwaltung') h += z('f_was',ua,'sWas');
-  if(a==='jahr') h += z('f_arbeit',`<b>${ua}</b>`,'sWas');
+  if(a==='jahr') h += z('f_arbeit',`<b>${ua}</b>`,'s2');
   if(a==='intern') h += z('f_was',ua,'sWas') + (istBestellung(entwurf)?z('f_menge',esc(palettenText(entwurf.paletten)),'sWas'):'') + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sWas');
   if(a==='zaehler') h += z('f_zaehler',ZAEHLERARTEN.filter(x=>entwurf.zaehler[x.id]).map(x=>`<b>${esc(x.n[L]||x.n.de)}</b> ${esc(entwurf.zaehler[x.id].wert)} ${esc(entwurf.zaehler[x.id].einheit)}`).join('<br>'),'sZaehler')
     + z('f_zeit',`${datumIso(entwurf.intern.datum)}, ${esc(entwurf.intern.zeit)}`,'sZaehler');
@@ -1425,7 +1463,11 @@ $('#hw-pruef').addEventListener('click',e=>{const b=e.target.closest('.aendern')
 
 function pruefeSchritt(s){
   if(s==='s1'&&!entwurf.objekt) return 'e_objekt';
-  if(s==='s2'){
+  if(s==='s2'&&istJahr(entwurf)){
+    if(!entwurf.unterart) return 'e_unterart_jahr';
+    if(entwurf.unterart==='andere'&&!entwurf.unterartAndere.trim()){ $('#hw-jahr-andere').classList.add('fehlerhaft'); $('#hw-jahr-andere').focus(); return 'e_unterart_andere'; }
+  }
+  if(s==='s2'&&!istJahr(entwurf)){
     if(!entwurf.hausnr.trim()){ $('#hw-hausnr').classList.add('fehlerhaft'); $('#hw-hausnr').focus(); return 'e_hausnr'; }
     if(!entwurf.ort) return 'e_ort';
     if(entwurf.ort==='mieter'&&!entwurf.mieter.trim()){ $('#hw-mieter').classList.add('fehlerhaft'); $('#hw-mieter').focus(); return 'e_mieter'; }
