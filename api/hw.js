@@ -11,7 +11,9 @@ import { rpc, dbBereit } from '../lib/db.js';
 import { erstelleToken, pruefeToken, gleich } from '../lib/sitzung.js';
 import { uebersetzeTexte } from '../lib/uebersetzung.js';
 import { versendeMeldung } from '../lib/mailversand.js';
-import { bereinige, bereinigeFotos, mailDaten, deutschOk, istJahr } from '../lib/meldung.js';
+import { bereinige, bereinigeFotos, mailDaten, deutschOk, istJahr, istBestellung } from '../lib/meldung.js';
+import { versendeBestellung, versendeFreigabe } from '../lib/bestellversand.js';
+import { brauchtFreigabe } from '../lib/artikel.js';
 
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
@@ -48,6 +50,19 @@ async function verarbeite(nr, { neuUebersetzen = false } = {}) {
 
   // 2. Mail an die Hauswartung (+ Verwaltung), bzw. Verwaltung nachträglich, sobald Deutsch vorliegt
   const o = (await rpc('hw_objekt', { p_nr: m.objekt })) || { nr: m.objekt, strasse: `Objekt ${m.objekt}`, ort: '', kunde: '', email: '' };
+  if (istBestellung(m)) {
+    if (m.mail !== 'gesendet') {
+      try {
+        const a = await versendeBestellung(m, o);
+        Object.assign(patch, { mail: 'gesendet', mailVia: a.via, mailZeit: new Date().toISOString(), mailFehler: '', lieferantMail: a.lieferant });
+      } catch (e) {
+        console.error('Bestellung', nr, e);
+        Object.assign(patch, { mail: 'wartet', mailFehler: String(e.message || e).slice(0, 300) });
+      }
+    }
+    if (!Object.keys(patch).length) { delete m.fotos; return m; }
+    return rpc('hw_meldung_aendern', { p_nr: nr, p_status: null, p_daten: patch });
+  }
   const d = mailDaten(m, o);
   const nurVerwaltung = m.mail === 'gesendet' && ['nicht_uebersetzt', 'fehler'].includes(m.verwaltungMail) && deutschOk(m);
   if (m.mail !== 'gesendet' || nurVerwaltung) {
@@ -106,6 +121,8 @@ const AKTIONEN = {
     if (!r.neu && r.meldung.mail === 'gesendet') return { meldung: r.meldung, doppelt: true };
     // Hat die Hauswartung es selbst erledigt, steht die Meldung sofort auf «Erledigt»
     if (r.neu && m.massnahme === 'erledigt') await rpc('hw_meldung_aendern', { p_nr: r.meldung.nr, p_status: 'erledigt', p_daten: {} });
+    // Streusalz ist mit dem Versand erledigt, Regeneriersalz wartet auf die Freigabe
+    if (r.neu && m.art === 'bestellung' && !brauchtFreigabe(m.unterart)) await rpc('hw_meldung_aendern', { p_nr: r.meldung.nr, p_status: 'erledigt', p_daten: {} });
     return { meldung: await verarbeite(r.meldung.nr) };
   },
 
@@ -169,6 +186,37 @@ const AKTIONEN = {
     w.email = adressen.join(', ');
     return rpc('hw_objekt_speichern', { p_alt: alt || null, p_o: w });
   },
+  // Bestellung freigeben: Lieferdatum eintragen und den Bestellschein an den Lieferanten senden
+  async bestellung_freigeben({ token, nr, lieferdatum }) {
+    const t = adminPruefen(token);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(String(lieferdatum || ''))) throw new Fehler(400, 'e_lieferdatum');
+    const m = await rpc('hw_meldung_holen', { p_nr: Number(nr), p_fotos: false });
+    if (!m || m.art !== 'bestellung') throw new Fehler(404, 'nicht_gefunden');
+    if (m.stand === 'bestellt') return { meldung: m, doppelt: true };
+    if (m.stand === 'abgelehnt') throw new Fehler(400, 'abgelehnt');
+    const o = (await rpc('hw_objekt', { p_nr: m.objekt })) || { nr: m.objekt, strasse: `Objekt ${m.objekt}`, ort: '', kunde: '' };
+    const patch = { lieferdatum, freigabeVon: 'Admin' };
+    try {
+      const a = await versendeFreigabe({ ...m, ...patch }, o);
+      Object.assign(patch, { stand: 'bestellt', lieferantMail: a.lieferant, mailZeit: new Date().toISOString(), mailFehler: '' });
+    } catch (e) {
+      console.error('Freigabe', nr, e);
+      throw new Fehler(502, 'lieferant_fehler', String(e.message || e).slice(0, 200));
+    }
+    return { meldung: await rpc('hw_meldung_aendern', { p_nr: Number(nr), p_status: 'erledigt', p_daten: patch }) };
+  },
+
+  // Bestellung ablehnen: geht nicht an den Lieferanten, der Hauswart sieht den Grund
+  async bestellung_ablehnen({ token, nr, grund }) {
+    adminPruefen(token);
+    const g = String(grund || '').trim().slice(0, 300);
+    if (!g) throw new Fehler(400, 'e_grund');
+    const m = await rpc('hw_meldung_holen', { p_nr: Number(nr), p_fotos: false });
+    if (!m || m.art !== 'bestellung') throw new Fehler(404, 'nicht_gefunden');
+    if (m.stand === 'bestellt') throw new Fehler(400, 'schon_bestellt');
+    return { meldung: await rpc('hw_meldung_aendern', { p_nr: Number(nr), p_status: 'erledigt', p_daten: { stand: 'abgelehnt', ablehnGrund: g } }) };
+  },
+
   async objekt_loeschen({ token, nr }) { adminPruefen(token); return rpc('hw_objekt_loeschen', { p_nr: String(nr) }); },
 
   async hauswart_speichern({ token, alt, hauswart }) {
