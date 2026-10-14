@@ -14,6 +14,22 @@ import { versendeMeldung } from '../lib/mailversand.js';
 import { bereinige, bereinigeFotos, mailDaten, deutschOk, istJahr, istBestellung } from '../lib/meldung.js';
 import { versendeBestellung, versendeFreigabe } from '../lib/bestellversand.js';
 import { brauchtFreigabe } from '../lib/artikel.js';
+import { sendeChat, sendeKopie, chatBereit } from '../lib/beekeeper.js';
+import { chatText, chatTextFreigabe, chatTextAblehnung } from '../lib/chattext.js';
+
+/* Bestätigung an den Hauswart im Beekeeper-Chat – erst nachdem die Meldung wirklich versendet ist.
+   Der Chat ist eine Zugabe: Schlägt er fehl, bleibt die Meldung versendet. */
+async function chatAnHauswart(m, text, pdfDatei) {
+  if (!chatBereit()) return null;
+  try {
+    const a = await sendeChat(m.pnr, text, pdfDatei);
+    sendeKopie(text, pdfDatei).catch(() => { });     // optionale Kopie, blockiert nicht
+    return { chat: a.stand, chatZeit: new Date().toISOString(), chatFehler: a.fehler || '' };
+  } catch (e) {
+    console.error('Chat', e);
+    return { chat: 'fehler', chatFehler: String(e.message || e).slice(0, 200) };
+  }
+}
 
 export const config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
 
@@ -55,6 +71,7 @@ async function verarbeite(nr, { neuUebersetzen = false } = {}) {
       try {
         const a = await versendeBestellung(m, o);
         Object.assign(patch, { mail: 'gesendet', mailVia: a.via, mailZeit: new Date().toISOString(), mailFehler: '', lieferantMail: a.lieferant });
+        Object.assign(patch, await chatAnHauswart(m, chatText(mailDaten({ ...m, ...patch }, o)), a.pdfDatei) || {});
       } catch (e) {
         console.error('Bestellung', nr, e);
         Object.assign(patch, { mail: 'wartet', mailFehler: String(e.message || e).slice(0, 300) });
@@ -70,6 +87,7 @@ async function verarbeite(nr, { neuUebersetzen = false } = {}) {
       const a = await versendeMeldung(d, { verwaltungEmail: o.email, intern: !nurVerwaltung });
       if (!nurVerwaltung) Object.assign(patch, { mail: 'gesendet', mailVia: a.via, mailZeit: new Date().toISOString(), mailFehler: '' });
       Object.assign(patch, { verwaltungMail: a.verwaltung, verwaltungAdresse: a.verwaltungAdresse || '' });
+      if (!nurVerwaltung && !m.chat) Object.assign(patch, await chatAnHauswart(m, chatText(d), a.pdfDatei) || {});
     } catch (e) {
       console.error('Mail', nr, e);
       if (!nurVerwaltung) Object.assign(patch, { mail: 'wartet', mailFehler: String(e.message || e).slice(0, 300) });
@@ -199,6 +217,7 @@ const AKTIONEN = {
     try {
       const a = await versendeFreigabe({ ...m, ...patch }, o);
       Object.assign(patch, { stand: 'bestellt', lieferantMail: a.lieferant, mailZeit: new Date().toISOString(), mailFehler: '' });
+      Object.assign(patch, await chatAnHauswart(m, chatTextFreigabe(mailDaten({ ...m, ...patch }, o)), a.pdfDatei) || {});
     } catch (e) {
       console.error('Freigabe', nr, e);
       throw new Fehler(502, 'lieferant_fehler', String(e.message || e).slice(0, 200));
@@ -214,7 +233,10 @@ const AKTIONEN = {
     const m = await rpc('hw_meldung_holen', { p_nr: Number(nr), p_fotos: false });
     if (!m || m.art !== 'bestellung') throw new Fehler(404, 'nicht_gefunden');
     if (m.stand === 'bestellt') throw new Fehler(400, 'schon_bestellt');
-    return { meldung: await rpc('hw_meldung_aendern', { p_nr: Number(nr), p_status: 'erledigt', p_daten: { stand: 'abgelehnt', ablehnGrund: g } }) };
+    const o2 = (await rpc('hw_objekt', { p_nr: m.objekt })) || { nr: m.objekt, strasse: `Objekt ${m.objekt}`, ort: '', kunde: '' };
+    const daten = { stand: 'abgelehnt', ablehnGrund: g };
+    Object.assign(daten, await chatAnHauswart(m, chatTextAblehnung(mailDaten({ ...m, ...daten }, o2)), null) || {});
+    return { meldung: await rpc('hw_meldung_aendern', { p_nr: Number(nr), p_status: 'erledigt', p_daten: daten }) };
   },
 
   async objekt_loeschen({ token, nr }) { adminPruefen(token); return rpc('hw_objekt_loeschen', { p_nr: String(nr) }); },
