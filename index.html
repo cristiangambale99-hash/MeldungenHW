@@ -1812,6 +1812,15 @@ function mailHtml(m){
   return `<span class="tag warnung">Noch nicht gesendet</span> <button type="button" class="btn secondary" id="modal-mail-neu" style="min-height:30px;margin-left:6px">Jetzt senden</button>`;
 }
 const istJahrM = m => !!m && m.art==='jahr';
+/* Bestätigung im Beekeeper-Chat an den Hauswart */
+const CHAT_STAND = { gesendet:{name:'Gesendet',tag:'positiv'}, kein_konto:{name:'Kein Beekeeper-Konto',tag:'warnung'},
+  fehler:{name:'Nicht zugestellt',tag:'negativ'}, aus:{name:'Abgeschaltet',tag:''}, unvollstaendig:{name:'Übersprungen',tag:''} };
+function chatHtml(m){
+  if(!m.chat) return '<span class="mail-leer">Noch nicht gesendet</span>';
+  const s=CHAT_STAND[m.chat]||{name:m.chat,tag:''};
+  return `<span class="tag ${s.tag}">${esc(s.name)}</span>${m.chatZeit?' <span class="nr">'+new Date(m.chatZeit).toLocaleTimeString('de-CH',{hour:'2-digit',minute:'2-digit'})+'</span>':''}`
+    + (m.chatFehler?`<br><span class="nr" style="font-size:11px">${esc(m.chatFehler)}</span>`:'');
+}
 const textFuerVerwaltung = m => (m.uebersetzung==='ok'||m.uebersetzung==='manuell'||m.uebersetzung==='nicht_noetig') ? (m.textDe||m.text) : m.text;
 const brauchtUebersetzung = m => m.uebersetzung==='ausstehend'||m.uebersetzung==='laeuft';
 function uebersetzungTag(m){
@@ -2056,6 +2065,7 @@ function oeffne(nr){
         </div>`}</dd>
       <dt>Gemeldet</dt><dd>${datum(m.gemeldet)} · ${esc(m.hwName)} (${esc(m.pnr)})</dd>
       <dt>E-Mail</dt><dd><span class="nr">${esc(MAIL_EMPFAENGER)}</span><br>${mailHtml(m)}</dd>
+      <dt>Beekeeper</dt><dd>${chatHtml(m)}<br><span class="nr" style="font-size:11px">Bestätigung an ${esc(m.hwName)}</span></dd>
       ${m.art!=='intern'?`<dt>An Verwaltung</dt><dd>${verwaltungHtml(m)}</dd>`:''}
     </dl>
     ${m.pikett?aufwandHtml(m):''}
